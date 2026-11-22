@@ -50,6 +50,8 @@ interface CriterionBase {
   messageName: string;
   /** Phrase completing "We could not find … in the document." */
   infoRequestAsk: string;
+  /** Short, fictional reason shown as "Why suggested" on the Criteria step. */
+  suggestionReason: string;
   /** Default weight in %, or null for a "More suggestions" criterion (added with weight 0). */
   defaultWeight: number | null;
   unit: UnitSpec;

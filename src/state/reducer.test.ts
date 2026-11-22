@@ -24,6 +24,10 @@ describe('reducer', () => {
     expect(d.stage).toBe('workspace');
     expect(d.audit[0]).toMatchObject({ action: 'comparison_run', actor: 'Contrast (simulated AI)' });
     expect(d.audit[0].summary).toBe('Extracted 17 of 18 values from 3 documents: 2 need review, 1 not found.');
+    expect(d.audit[1]).toMatchObject({
+      action: 'criteria_confirmed',
+      summary: 'Criteria confirmed. You kept 6 of 6 suggested criteria · 0 weights changed · 0 added.',
+    });
     const v = view(s);
     expect(v.pendingReviewKeys).toHaveLength(2);
     expect(v.checklist.map((c) => c.done)).toEqual([true, false, false, false]);
@@ -64,7 +68,12 @@ describe('reducer', () => {
       { type: 'RUN_COMPARISON', at, id: id() },
     );
     expect(s.sessions.D!.reviews['d_impurity|pacifico']?.type).toBe('confirm');
-    expect(s.sessions.D!.audit.at(-1)?.summary).toBe('Setup updated: Assay purity 25% → 20%; Lead time 10% → 15%.');
+    const audit = s.sessions.D!.audit;
+    expect(audit.find((e) => e.action === 'setup_updated')?.summary).toBe('Setup updated: Assay purity 25% → 20%; Lead time 10% → 15%.');
+    expect(audit.at(-1)).toMatchObject({
+      action: 'criteria_confirmed',
+      summary: 'Criteria confirmed. You kept 6 of 6 suggested criteria · 2 weights changed · 0 added.',
+    });
     expect(view(s).cells['d_impurity|pacifico'].status).toBe('human_verified');
   });
 

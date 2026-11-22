@@ -19,7 +19,7 @@ export function SetupStep() {
 
       <section className="mt-8" aria-labelledby="question-label">
         <h2 id="question-label" className="text-sm font-semibold text-slate-900">
-          Decision question
+          Your decision, in plain language
         </h2>
         <div className="mt-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
           <Lock className="mt-0.5 size-4 shrink-0 text-slate-400" aria-hidden />
@@ -29,7 +29,7 @@ export function SetupStep() {
           </p>
         </div>
         <p id="question-note" className="mt-2 text-sm text-slate-500">
-          In demo mode, the question and criteria are pre-generated for each scenario.
+          In the full version, you type this and Contrast proposes criteria from it. In this demo it's pre-written.
         </p>
       </section>
 

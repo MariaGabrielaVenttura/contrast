@@ -7,6 +7,7 @@ import type { ReviewAction } from '../lib/cells';
 import { isValidReview } from '../lib/cells';
 import { formatScore, formatValue, lowerFirst, possessive } from '../lib/format';
 import { distributeEvenly, largestRemainder, normalizeWeights } from '../lib/scoring';
+import { acceptance, acceptanceText } from '../lib/suggestions';
 import type { AppState, AuditEntry, Filters, ScenarioSession, Setup, Stage, TabId, Toast, UiState, WhatIfState } from './types';
 
 export const MIN_CRITERIA = 3;
@@ -164,6 +165,13 @@ function runSession(scenario: Scenario, s: ScenarioSession, at: string, id: stri
       ? { id, at, actor: 'You', action: 'setup_updated', summary: `Setup updated: ${changes.join('; ')}.` }
       : null;
   }
+  const criteriaEntry: AuditEntry = {
+    id: `${id}-criteria`,
+    at,
+    actor: 'You',
+    action: 'criteria_confirmed',
+    summary: `Criteria confirmed. ${acceptanceText(acceptance(scenario, s.setup))}.`,
+  };
   return {
     ...s,
     hasRun: true,
@@ -173,7 +181,7 @@ function runSession(scenario: Scenario, s: ScenarioSession, at: string, id: stri
     openCell: null,
     lastRunSetup: { criteria: [...s.setup.criteria], weights: { ...s.setup.weights } },
     lastRunNicknames: { ...s.nicknames },
-    audit: entry ? [...s.audit, entry] : s.audit,
+    audit: [...s.audit, ...(entry ? [entry] : []), criteriaEntry],
   };
 }
 

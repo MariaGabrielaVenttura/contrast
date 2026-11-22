@@ -101,7 +101,14 @@
     box-shadow: none !important;
   }
   .report > :not(:first-child) {
-    margin-top: 1rem !important;
+    margin-top: 0.8rem !important;
+  }
+  .report ol li {
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
+  }
+  .report footer {
+    padding-top: 0.4rem !important;
   }
   .report td {
     padding-top: 0.25rem !important;

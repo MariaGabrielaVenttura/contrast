@@ -7,6 +7,7 @@ import { cellKey, splitCellKey } from '../../../data/types';
 import { STATUS_LABEL, type CellStatus } from '../../../lib/cells';
 import { formatDate, formatPercent, formatScore, formatTime, formatTotal } from '../../../lib/format';
 import { ruleLabel } from '../../../lib/rules';
+import { acceptance, acceptanceText } from '../../../lib/suggestions';
 import type { ScenarioView } from '../../../state/selectors';
 import type { AuditEntry } from '../../../state/types';
 import { DecisionStamp } from '../insights/DecisionStamp';
@@ -187,6 +188,9 @@ export function ReportDocument({ view, model }: { view: ScenarioView; model: Ins
           </ul>
         </Section>
         <Section n={3} title="Criteria and weights">
+          <p className="mb-1.5 text-xs text-slate-600" data-testid="report-acceptance">
+            {acceptanceText(acceptance(scenario, session.setup))}
+          </p>
           <ul className="space-y-1 text-sm">
             {criteria.map(({ def, weight }) => (
               <li key={def.id} className="flex items-baseline justify-between gap-3">

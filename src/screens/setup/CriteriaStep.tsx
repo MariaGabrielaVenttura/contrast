@@ -1,9 +1,10 @@
-import { AlertCircle, ArrowDown, ArrowLeft, ArrowUp, CheckCircle2, Equal, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowDown, ArrowLeft, ArrowUp, CheckCircle2, Equal, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { useRef } from 'react';
 import { Button } from '../../components/ui/Button';
 import { cx } from '../../components/ui/cx';
 import { getCriterion, suggestionCriteria } from '../../data/scenarios';
-import type { CriterionDef } from '../../data/types';
+import type { CriterionDef, Scenario } from '../../data/types';
+import { acceptance, acceptanceText, whySuggested } from '../../lib/suggestions';
 import { formatPercent } from '../../lib/format';
 import { ruleLabel } from '../../lib/rules';
 import { newId, now, useApp, useView } from '../../state/AppContext';
@@ -13,6 +14,17 @@ import { SetupLayout } from './SetupLayout';
 export function RuleChip({ def }: { def: CriterionDef }) {
   return (
     <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">{ruleLabel(def)}</span>
+  );
+}
+
+function WhySuggested({ scenario, def }: { scenario: Scenario; def: CriterionDef }) {
+  return (
+    <p className="mt-1.5 flex items-start gap-1.5 text-xs text-slate-600">
+      <Sparkles className="mt-0.5 size-3.5 shrink-0 text-brass-600" aria-hidden />
+      <span>
+        <span className="font-semibold text-slate-700">Why suggested:</span> {whySuggested(scenario, def.id)} · {def.suggestionReason}
+      </span>
+    </p>
   );
 }
 
@@ -90,7 +102,17 @@ export function CriteriaStep() {
       <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">Confirm criteria and weights</h1>
       <p className="mt-2 text-slate-600">Contrast suggested these criteria for your question. Adjust weights so they add up to 100%.</p>
 
-      <ol className="mt-8 space-y-3" aria-label="Selected criteria">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-2">
+        <p className="inline-flex items-center gap-1.5 rounded-full border border-brass-300 bg-brass-50 px-2.5 py-0.5 text-xs font-semibold text-brass-800">
+          <Sparkles className="size-3.5" aria-hidden />
+          Suggested by Contrast (simulated AI)
+        </p>
+        <p className="text-xs text-slate-600" aria-live="polite" data-testid="acceptance">
+          {acceptanceText(acceptance(scenario, session.setup))}
+        </p>
+      </div>
+
+      <ol className="mt-3 space-y-3" aria-label="Selected criteria">
         {session.setup.criteria.map((id, i) => {
           const def = getCriterion(scenario, id);
           return (
@@ -102,6 +124,7 @@ export function CriteriaStep() {
                     <RuleChip def={def} />
                   </div>
                   <p className="mt-1 text-sm text-slate-600">{def.description}</p>
+                  <WhySuggested scenario={scenario} def={def} />
                 </div>
                 <div className="flex items-center gap-2 md:w-[22rem]">
                   <div className="min-w-0 flex-1">
@@ -187,6 +210,7 @@ export function CriteriaStep() {
                     <RuleChip def={def} />
                   </div>
                   <p className="text-sm text-slate-600">{def.description}</p>
+                  <WhySuggested scenario={scenario} def={def} />
                 </div>
                 <Button size="sm" variant="subtle" icon={<Plus className="size-4" aria-hidden />} aria-label={`Add ${def.name}`} onClick={() => add(def.id)}>
                   Add

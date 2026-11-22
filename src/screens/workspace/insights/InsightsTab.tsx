@@ -2,6 +2,7 @@ import { ArrowRight, Lightbulb, Target, TrendingUp, Trophy } from 'lucide-react'
 import { useMemo } from 'react';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { formatPercent } from '../../../lib/format';
+import { acceptance, acceptanceText } from '../../../lib/suggestions';
 import { useApp, useView } from '../../../state/AppContext';
 import { insightsModel } from './model';
 import { DecisionStamp } from './DecisionStamp';
@@ -60,6 +61,9 @@ export function InsightsTab() {
               </li>
             ))}
           </ol>
+          <p className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-600" data-testid="acceptance">
+            {acceptanceText(acceptance(scenario, view.session.setup))}
+          </p>
         </section>
 
         <section aria-labelledby="drivers-heading" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

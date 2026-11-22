@@ -23,6 +23,7 @@ export type AuditActor = 'You' | 'Contrast (simulated AI)' | 'Supplier (simulate
 export type AuditAction =
   | 'comparison_run'
   | 'setup_updated'
+  | 'criteria_confirmed'
   | 'confirmed'
   | 'edited'
   | 'value_added'
