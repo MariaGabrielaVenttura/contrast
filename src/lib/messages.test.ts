@@ -65,7 +65,7 @@ describe('counter, info request and summary', () => {
     });
     expect(m).toContain('Subject: Information request — Regulatory inspection history');
     expect(m).toContain('Hello Pacífico Labs team,');
-    expect(m).toContain(`We could not find ${inspection.infoRequestAsk} in the document.`);
+    expect(m).toContain(`We could not find this information in the document: ${inspection.infoRequestAsk}.`);
   });
   it('builds the copy summary', () => {
     const s = copySummary({

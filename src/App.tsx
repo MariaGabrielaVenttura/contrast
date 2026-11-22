@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Footer } from './components/layout/Footer';
 import { TipProvider } from './components/ui/Tip';
 import { ToastRegion } from './components/ui/Toasts';
@@ -7,6 +7,8 @@ import { CriteriaStep } from './screens/setup/CriteriaStep';
 import { SetupStep } from './screens/setup/SetupStep';
 import { StartScreen } from './screens/start/StartScreen';
 import { Workspace } from './screens/workspace/Workspace';
+import { DemoChecklist } from './overlays/DemoChecklist';
+import { WelcomeModal } from './overlays/WelcomeModal';
 
 function Screens() {
   const { state } = useApp();
@@ -36,6 +38,14 @@ function useGlobalDropGuard() {
   }, []);
 }
 
+/** Leaves room at the bottom so the floating demo guide never hides the end of the page. */
+function ChecklistSpacer({ children }: { children: ReactNode }) {
+  const { state } = useApp();
+  const open = !!state.activeScenarioId && state.ui.checklistOpen && !state.ui.welcomeOpen;
+  const pad = !open ? '' : state.ui.checklistCollapsed ? 'pb-20' : 'pb-80';
+  return <div className={`flex min-h-dvh flex-col print:pb-0 ${pad}`}>{children}</div>;
+}
+
 export default function App() {
   useGlobalDropGuard();
   return (
@@ -47,10 +57,12 @@ export default function App() {
         >
           Skip to content
         </a>
-        <div className="flex min-h-dvh flex-col">
+        <ChecklistSpacer>
           <Screens />
           <Footer />
-        </div>
+        </ChecklistSpacer>
+        <DemoChecklist />
+        <WelcomeModal />
         <ToastRegion />
       </TipProvider>
     </AppProvider>

@@ -60,7 +60,7 @@ export function infoRequestMessage(c: InfoRequestContext): string {
     `Hello ${c.nickname} team,`,
     '',
     `We are reviewing "${c.documentName}" to answer: "${c.question}"`,
-    `We could not find ${c.ask} in the document. Could you share it, together with where it is stated (page, clause or cell)?`,
+    `We could not find this information in the document: ${c.ask}. Could you share it, together with where it is stated (page, clause or cell)?`,
     '',
     'Thank you.',
   ].join('\n');

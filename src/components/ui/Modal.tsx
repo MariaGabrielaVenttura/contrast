@@ -12,10 +12,12 @@ interface ModalProps {
   children?: ReactNode;
   footer?: ReactNode;
   initialFocus?: RefObject<HTMLElement | null>;
+  /** Where focus goes on close when the trigger no longer exists. */
+  returnFocus?: () => void;
   size?: 'md' | 'lg';
 }
 
-export function Modal({ open, onOpenChange, title, description, eyebrow, children, footer, initialFocus, size = 'md' }: ModalProps) {
+export function Modal({ open, onOpenChange, title, description, eyebrow, children, footer, initialFocus, returnFocus, size = 'md' }: ModalProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -25,6 +27,12 @@ export function Modal({ open, onOpenChange, title, description, eyebrow, childre
             if (initialFocus?.current) {
               e.preventDefault();
               initialFocus.current.focus();
+            }
+          }}
+          onCloseAutoFocus={(e) => {
+            if (returnFocus) {
+              e.preventDefault();
+              returnFocus();
             }
           }}
           className={cx(
