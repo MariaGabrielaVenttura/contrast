@@ -54,6 +54,34 @@ function heat(score: number, best: boolean): { background: string; color: string
 
 const HATCH = 'repeating-linear-gradient(135deg, #f1f5f9 0 5px, #e2e8f0 5px 10px)';
 
+/** Shown while a What-if simulation differs from the confirmed setup. Never replaces the verdict. */
+function SimulationBox({ view, sim }: { view: ScenarioView; sim: NonNullable<NonNullable<ScenarioView['whatIf']>['analysis']> }) {
+  const w = view.whatIf!.state;
+  const changes: string[] = [];
+  const weightChanges = view.session.setup.criteria.filter(
+    (id) => !w.excludedCriteria.includes(id) && (w.weights[id] ?? 0) !== (view.session.setup.weights[id] ?? 0),
+  ).length;
+  if (weightChanges) changes.push(`${weightChanges} weight${weightChanges === 1 ? '' : 's'} changed`);
+  if (w.excludedCriteria.length) changes.push(`excluded ${w.excludedCriteria.map((id) => getCriterion(view.scenario, id).name).join(', ')}`);
+  if (w.excludedDocs.length) changes.push(`excluded ${w.excludedDocs.map(view.nickname).join(', ')}`);
+  if (w.gapPolicy === 'neutral') changes.push('gaps treated as neutral (average of others)');
+  return (
+    <section
+      aria-label="What-if simulation (not applied)"
+      data-testid="report-simulation"
+      className="break-inside-avoid rounded-xl border border-dashed border-brass-400 bg-brass-50 px-4 py-3 text-sm"
+    >
+      <p className="font-semibold text-brass-800">What-if simulation (not applied)</p>
+      <p className="mt-1 text-slate-800">
+        {sim.results.ranking.map((r, i) => `${i + 1}. ${view.nickname(r.docId)} ${formatPercent(r.adherence)}`).join(' · ')}
+        {sim.results.isTie ? ' · technical tie' : ''}
+      </p>
+      {changes.length > 0 && <p className="mt-0.5 text-xs text-slate-700">Changes: {changes.join('; ')}.</p>}
+      <p className="mt-0.5 text-xs text-slate-700">The verdict above reflects the confirmed setup. Apply or reset the simulation in Insights.</p>
+    </section>
+  );
+}
+
 function groupByDate(entries: AuditEntry[]): { date: string; items: { entry: AuditEntry; index: number }[] }[] {
   const groups: { date: string; items: { entry: AuditEntry; index: number }[] }[] = [];
   entries.forEach((entry, index) => {
@@ -135,6 +163,10 @@ export function ReportDocument({ view, model }: { view: ScenarioView; model: Ins
           </ol>
         </div>
       </section>
+
+      {view.whatIf?.modified && view.whatIf.analysis && (
+        <SimulationBox view={view} sim={view.whatIf.analysis} />
+      )}
 
       <Section n={1} title="Decision question">
         <p className="font-display text-lg leading-snug text-ink-900">{scenario.question}</p>

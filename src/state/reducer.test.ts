@@ -221,3 +221,37 @@ describe('reducer', () => {
     expect(Object.values(s.sessions.A!.setup.weights)).toEqual([15, 15, 14, 14, 14, 14, 14]);
   });
 });
+
+describe('What-if reproduces the SPEC neutral gap policy results', () => {
+  const neutral = (id: 'A' | 'B' | 'C' | 'D') => {
+    const s = apply(initialState, quick(id), { type: 'SET_WHATIF', patch: { gapPolicy: 'neutral' } });
+    const v = view(s);
+    return {
+      after: Object.fromEntries(v.whatIf!.analysis!.results.ranking.map((r) => [r.docId, r.adherenceTenths / 10])),
+      tie: v.whatIf!.analysis!.results.isTie,
+      confirmedLeader: v.analysis!.results.leaderId,
+    };
+  };
+  it('A: Gamma 88.6%, Alpha 86.9%, Beta 75.7% (technical tie); confirmed result unchanged', () => {
+    expect(neutral('A')).toEqual({ after: { gamma: 88.6, alpha: 86.9, beta: 75.7 }, tie: true, confirmedLeader: 'alpha' });
+  });
+  it('B: South 90.5%, North 88.3% (technical tie)', () => {
+    expect(neutral('B')).toMatchObject({ after: { south: 90.5, north: 88.3 }, tie: true });
+  });
+  it('C: RotaLog 97.1%, FastFreight 82.5%', () => {
+    expect(neutral('C')).toMatchObject({ after: { rotalog: 97.1, fastfreight: 82.5 }, tie: false });
+  });
+  it('D: Pacífico 95.1%, Norden 89.8%, Helix 83.2%', () => {
+    expect(neutral('D')).toMatchObject({ after: { pacifico: 95.1, norden: 89.8, helix: 83.2 } });
+  });
+  it('moving one weight updates the simulation only; Reset restores the confirmed setup', () => {
+    let s = apply(initialState, quick('D'), { type: 'SET_WHATIF', patch: { weights: { ...defaultWeightsD, d_inspection: 60 } } });
+    expect(view(s).whatIf!.modified).toBe(true);
+    expect(view(s).analysis!.results.leaderId).toBe('norden');
+    expect(s.sessions.D!.setup.weights.d_inspection).toBe(15);
+    s = apply(s, { type: 'RESET_WHATIF' });
+    expect(view(s).whatIf!.modified).toBe(false);
+  });
+});
+
+const defaultWeightsD = { d_purity: 25, d_impurity: 20, d_gmp: 15, d_price: 15, d_leadtime: 10, d_inspection: 15 };

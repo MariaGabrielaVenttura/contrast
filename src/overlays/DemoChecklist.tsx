@@ -8,8 +8,6 @@ import { isChecklistComplete, type ChecklistStep } from '../lib/checklist';
 import { newId, now, useApp } from '../state/AppContext';
 import type { ScenarioView } from '../state/selectors';
 
-// TODO(phase 7b): set to true when the What-if panel ships, to restore the SPEC bonus hint.
-const WHAT_IF_AVAILABLE = false;
 
 const iconBtn = 'rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800';
 
@@ -82,12 +80,10 @@ function ChecklistBody({ view, onNavigate }: { view: ScenarioView; onNavigate: (
 
       {complete && (
         <div className="mt-4 space-y-3 border-t border-slate-100 pt-4" data-testid="checklist-complete">
-          {WHAT_IF_AVAILABLE && (
-            <p className="flex gap-2 rounded-xl bg-ink-50 px-3 py-2 text-sm text-ink-900">
-              <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden />
-              Bonus: drag a weight in What-if and watch the ranking and report update instantly.
-            </p>
-          )}
+          <p className="flex gap-2 rounded-xl bg-ink-50 px-3 py-2 text-sm text-ink-900">
+            <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden />
+            Bonus: drag a weight in What-if and watch the ranking and report update instantly.
+          </p>
           <p className="flex gap-2 text-sm font-medium text-slate-900">
             <PartyPopper className="mt-0.5 size-4 shrink-0 text-brass-600" aria-hidden />
             That's Contrast: from documents to a defensible decision in minutes. Same engine, any industry. Try another:
