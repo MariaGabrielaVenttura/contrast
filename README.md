@@ -31,7 +31,7 @@ I built Contrast as a personal project to practise the full product cycle on tha
 | **3. Compare** | Side-by-side matrix with a score bar for each value. Open any cell to see the highlighted evidence, the page/clause/cell it came from, the scoring rule and the calculation. |
 | **4. Review** | Values extracted with AI confidence below 70% are flagged **Needs review**: confirm them or edit them. |
 | **5. Handle gaps** | For missing information, choose: **add the value**, **request it from the supplier** (a ready-to-copy message), or **decide without it** (accept the risk, with a recorded reason). |
-| **6. Decide** | Insights show the recommendation, what drives it, decision robustness, and the exact value that would flip the ranking for each gap. |
+| **6. Decide** | Insights show the recommendation, what drives it, decision robustness, and the exact value that would flip the ranking for each gap. A **What-if** panel lets you change weights, exclude documents or criteria and treat gaps as neutral, with a Before vs After ranking, without touching the confirmed setup until you apply it. |
 | **7. Report** | A one-page decision brief: verdict, score heatmap, gaps, open requests, audit trail and sign-off. Export to PDF or copy a summary. |
 
 ### Four sample scenarios, one engine
@@ -76,11 +76,14 @@ A full version would add real AI extraction with citations, extraction-accuracy 
 ## Quality
 
 - **Pure scoring engine** (`src/lib/scoring.ts`), fully separated from the UI. Every number on screen comes from it.
-- **128 unit tests** cover every expected result in the spec for all four scenarios: default rankings, after filling a gap, the neutral gap policy, tipping points, robustness and decision status. They also cover edge cases such as ties at exactly 5.0 points, single found values and conservative rounding.
+- **133 unit tests** cover every expected result in the spec for all four scenarios: default rankings, after filling a gap, the neutral gap policy (also through What-if), tipping points, robustness and decision status. They also cover edge cases such as ties at exactly 5.0 points, single found values and conservative rounding.
+- **End-to-end tests** (Playwright) run the full Quick demo on desktop, and check the mobile layout at 375px with no horizontal scroll.
 - **Accessibility:**
+  - automated axe checks (WCAG 2.1 AA) on every main screen, desktop and mobile, as part of the end-to-end tests;
   - keyboard navigable, with a visible focus ring for keyboard users;
   - focus trapped and returned in dialogs and the evidence panel;
   - color is never the only signal: every status has a label or an icon.
+- **Mobile:** below 768px the matrix becomes one card per criterion, the evidence panel opens full screen and the demo guide becomes a bottom sheet.
 - **Print-ready report:** the PDF fits on one A4 page, without the browser's header and footer.
 
 ## Run it locally
@@ -90,6 +93,9 @@ npm install
 npm run dev      # http://localhost:5173
 npm run test     # unit tests
 npm run build    # type-check + production build
+
+npx playwright install chromium   # once, for end-to-end tests
+npm run test:e2e                  # Quick demo + mobile checks
 ```
 
 ## Project structure
@@ -102,13 +108,16 @@ src/
   screens/     start, setup, criteria, and the Compare / Insights / Report tabs
   overlays/    welcome modal, demo checklist, confirmations
   components/  UI building blocks
+e2e/           Playwright end-to-end tests (Quick demo, mobile, axe)
 ```
 
 ## Roadmap
 
-- [ ] What-if panel: change weights, exclude documents or criteria, switch the gap policy, compare before vs after
-- [ ] Mobile layout (cards instead of the matrix below 768px)
-- [ ] End-to-end test of the full Quick demo
+- [x] What-if panel: change weights, exclude documents or criteria, switch the gap policy, compare before vs after
+- [x] Mobile layout (cards instead of the matrix below 768px)
+- [x] End-to-end test of the full Quick demo
+- [ ] Real document parsing and AI extraction with citations
+- [ ] Custom criteria and industry templates
 
 ## Author
 
