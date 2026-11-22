@@ -202,7 +202,7 @@ function reviewAudit(scenario: Scenario, s: ScenarioSession, key: CellKey, revie
         summary: current
           ? `Updated the value for ${label}: ${describeValue(def, current)} → ${describeValue(def, review.value)}.`
           : `Added a value for ${label}: ${describeValue(def, review.value)}.`,
-        note: review.sourceNote,
+        note: review.value.kind === 'qualitative' && review.value.text === review.sourceNote ? undefined : review.sourceNote,
       };
     case 'request_info':
       return { ...base, action: 'info_requested', summary: `Drafted an information request for ${label}.` };

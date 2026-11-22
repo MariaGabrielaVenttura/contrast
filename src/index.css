@@ -27,3 +27,24 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff;
+    font-size: 9pt;
+  }
+  .report section,
+  .report tr {
+    break-inside: avoid;
+  }
+  .report * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
