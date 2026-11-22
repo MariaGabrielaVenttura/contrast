@@ -62,6 +62,36 @@ describe('decision status', () => {
     expect(status('C', { 'c_termination|fastfreight': 'accepted_gap' }).kind).toBe('accepted_risk');
   });
 
+  it('technical tie takes priority: "Too close to call: review the drivers before deciding"', () => {
+    // SPEC neutral-policy result for A is a technical tie (Gamma 88.6% vs Alpha 86.9%).
+    const a = analyze(buildInput(SCENARIOS.A, { gapPolicy: 'neutral' }));
+    expect(a.results.isTie).toBe(true);
+    const s = decisionStatus(a, () => 'auto');
+    expect(s).toEqual({ kind: 'too_close' });
+    expect(decisionLabel(s)).toBe('Too close to call: review the drivers before deciding');
+  });
+
+  it('a tie with no open gaps shows "Too close to call", not "Ready to decide"', () => {
+    // Synthetic input (not a SPEC value): Pacífico's inspection filled with score 3 → Pacífico 90.6% vs Norden 89.8%.
+    const a = analyze(buildInput(SCENARIOS.D, { overrides: { 'd_inspection|pacifico': { kind: 'qualitative', score: 3, text: 'x' } } }));
+    expect(a.gaps).toEqual([]);
+    expect(a.results.isTie).toBe(true);
+    expect(a.results.ranking.map((r) => [r.docId, r.adherenceTenths])).toEqual([
+      ['pacifico', 906],
+      ['norden', 898],
+      ['helix', 832],
+    ]);
+    expect(decisionStatus(a, () => 'auto').kind).toBe('too_close');
+  });
+
+  it('a tie also takes priority over open-gap statuses', () => {
+    // Synthetic weights (not SPEC values) that put all three D documents within 5.0 points while Pacífico's gap is open.
+    const weights = { d_purity: 25, d_impurity: 10, d_gmp: 15, d_price: 25, d_leadtime: 10, d_inspection: 15 };
+    const a = analyze(buildInput(SCENARIOS.D, { weights }));
+    expect(a.results.isTie).toBe(true);
+    expect(decisionStatus(a, (k) => (a.input.values[k] === null ? 'not_found' : 'auto')).kind).toBe('too_close');
+  });
+
   it('pluralizes', () => {
     expect(decisionLabel({ kind: 'provisional', keys: ['a|b', 'c|d'] })).toBe('Provisional — 2 pending answers could change #1');
     expect(decisionLabel({ kind: 'accepted_risk', keys: ['a|b', 'c|d'] })).toBe('Decided with 2 accepted risks');

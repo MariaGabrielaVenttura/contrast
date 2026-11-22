@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Hourglass, ShieldAlert } from 'lucide-react';
+import { CircleAlert, CircleCheck, Hourglass, Scale, ShieldAlert } from 'lucide-react';
 import { cx } from '../../../components/ui/cx';
 import type { DecisionStatus } from '../../../lib/decision';
 
@@ -6,7 +6,9 @@ const styles: Record<DecisionStatus['kind'], { cls: string; Icon: typeof CircleC
   ready: { cls: 'border-emerald-600 text-emerald-800 bg-emerald-50', Icon: CircleCheck },
   needs_decision: { cls: 'border-orange-500 text-orange-800 bg-orange-50', Icon: CircleAlert },
   provisional: { cls: 'border-sky-600 text-sky-800 bg-sky-50', Icon: Hourglass },
-  accepted_risk: { cls: 'border-rose-600 text-rose-800 bg-rose-50', Icon: ShieldAlert },
+  too_close: { cls: 'border-amber-500 text-amber-900 bg-amber-50', Icon: Scale },
+  // Amber: a deliberate, recorded risk. Red is reserved for blocking states.
+  accepted_risk: { cls: 'border-amber-500 text-amber-900 bg-amber-50', Icon: ShieldAlert },
 };
 
 /** Status stamp: "Ready to decide", "Provisional — …", "Decided with N accepted risk(s)". */

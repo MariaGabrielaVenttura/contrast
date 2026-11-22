@@ -6,6 +6,8 @@ import { canChangeLeader, type Analysis } from './scoring';
 
 export type DecisionStatus =
   | { kind: 'ready' }
+  /** The top two are a technical tie (≤ 5.0 points). Takes priority over every other status. */
+  | { kind: 'too_close' }
   /** A Not found gap that could change #1 has no decision yet. */
   | { kind: 'needs_decision'; keys: CellKey[] }
   /** An info request is open on a gap that could change #1. */
@@ -14,6 +16,7 @@ export type DecisionStatus =
   | { kind: 'accepted_risk'; keys: CellKey[] };
 
 export function decisionStatus(analysis: Analysis, statusOf: (key: CellKey) => CellStatus): DecisionStatus {
+  if (analysis.results.isTie) return { kind: 'too_close' };
   const changers = analysis.gaps.filter((k) => {
     const t = analysis.tipping[k];
     return t !== undefined && canChangeLeader(t);
@@ -36,6 +39,8 @@ export function decisionLabel(s: DecisionStatus): string {
   switch (s.kind) {
     case 'ready':
       return 'Ready to decide';
+    case 'too_close':
+      return 'Too close to call: review the drivers before deciding';
     case 'needs_decision': {
       const n = s.keys.length;
       return `Needs a decision — ${n} missing ${n === 1 ? 'value' : 'values'} could change #1`;

@@ -143,7 +143,11 @@ describe('reducer', () => {
       review: { type: 'accept_gap', reason: 'Checked in the on-site audit', at },
       id: id(),
     });
-    expect(s.sessions.D!.audit.at(-1)).toMatchObject({ action: 'gap_accepted', note: 'Checked in the on-site audit' });
+    expect(s.sessions.D!.audit.at(-1)).toMatchObject({
+      action: 'gap_accepted',
+      summary: "Decided without Pacífico Labs' regulatory inspection history (accepted risk, scores 0). Reason: Checked in the on-site audit",
+    });
+    expect(s.sessions.D!.audit.at(-1)?.note).toBeUndefined();
     s = apply(
       s,
       { type: 'REVIEW', key: 'd_inspection|pacifico', review: { type: 'request_info', message: 'm', at }, id: id() },
@@ -160,7 +164,12 @@ describe('reducer', () => {
         id: id(),
       },
     );
-    expect(s.sessions.D!.audit.at(-1)).toMatchObject({ actor: 'Supplier (simulated)', action: 'supplier_reply' });
+    expect(s.sessions.D!.audit.at(-1)).toMatchObject({
+      actor: 'Supplier (simulated)',
+      action: 'supplier_reply',
+      summary: 'Supplier reply received for Pacífico Labs · Regulatory inspection history: score 5.0 (No observations in the last two inspections).',
+    });
+    expect(s.sessions.D!.audit.at(-1)?.note).toBeUndefined();
     expect(view(s).analysis!.results.byDoc.pacifico.adherenceTenths).toBe(966);
   });
 

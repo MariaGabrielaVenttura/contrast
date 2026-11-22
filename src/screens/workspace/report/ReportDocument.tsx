@@ -10,6 +10,7 @@ import { ruleLabel } from '../../../lib/rules';
 import type { ScenarioView } from '../../../state/selectors';
 import type { AuditEntry } from '../../../state/types';
 import { DecisionStamp } from '../insights/DecisionStamp';
+import { buildRows } from '../compare/model';
 import type { InsightsModel } from '../insights/model';
 import { RobustnessBadge, TieBanner } from '../insights/shared';
 
@@ -35,12 +36,19 @@ const HUMAN_ICON: Partial<Record<CellStatus, { Icon: typeof Pencil; label: strin
   accepted_gap: { Icon: ShieldOff, label: 'Accepted gap' },
 };
 
-/** Heatmap tint: ink mixed into white in proportion to the score. */
-function heat(score: number): { background: string; color: string } {
-  const pct = Math.round(8 + (score / 5) * 72);
+/**
+ * Heatmap tint: light-to-medium ink, dark text throughout. The curve is steeper at the top so that
+ * 4.6 and 5.0 read differently, and low scores stay clearly lighter.
+ */
+export function heatPercent(score: number): number {
+  const t = Math.max(0, Math.min(1, score / 5));
+  return Math.round(4 + Math.pow(t, 3) * 40);
+}
+function heat(score: number, best: boolean): { background: string; color: string; boxShadow?: string } {
   return {
-    background: `color-mix(in srgb, var(--color-ink-600) ${pct}%, white)`,
-    color: pct > 50 ? '#fff' : 'var(--color-ink-900)',
+    background: `color-mix(in srgb, var(--color-ink-500) ${heatPercent(score)}%, white)`,
+    color: 'var(--color-ink-900)',
+    boxShadow: best ? 'inset 0 0 0 1.5px var(--color-brass-500)' : undefined,
   };
 }
 
@@ -63,6 +71,7 @@ export function ReportDocument({ view, model }: { view: ScenarioView; model: Ins
   const audit = [...session.audit].reverse();
   const hiddenInPrint = Math.max(0, audit.length - PRINT_AUDIT_LIMIT);
   const changers = model.gaps.filter((g) => g.canChange);
+  const best = new Set(buildRows(view).flatMap((r) => r.cells.filter((c) => c.isBest).map((c) => c.key)));
 
   return (
     <article
@@ -189,9 +198,10 @@ export function ReportDocument({ view, model }: { view: ScenarioView; model: Ins
                     <td
                       key={d.id}
                       className="relative rounded-md px-2 py-1.5 text-sm font-semibold tabular-nums"
-                      style={c.isGap ? { background: HATCH, color: 'var(--color-slate-600)' } : heat(score)}
+                      style={c.isGap ? { background: HATCH, color: 'var(--color-slate-600)' } : heat(score, best.has(key))}
                     >
                       {c.isGap ? <span className="text-xs font-medium">{STATUS_LABEL[c.status]}</span> : formatScore(score)}
+                      {best.has(key) && <span className="sr-only">, best in row</span>}
                       {icon && (
                         <span className="absolute right-1 top-1" title={icon.label}>
                           <icon.Icon className="size-3" aria-hidden />
@@ -223,8 +233,18 @@ export function ReportDocument({ view, model }: { view: ScenarioView; model: Ins
         </table>
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-600">
           <span className="flex items-center gap-1.5">
-            <span aria-hidden className="h-2.5 w-16 rounded-sm" style={{ background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-ink-600) 8%, white), var(--color-ink-600))' }} />
+            <span
+              aria-hidden
+              className="h-2.5 w-16 rounded-sm"
+              style={{
+                background: `linear-gradient(90deg, ${[0, 2.5, 4, 4.6, 5].map((s) => `color-mix(in srgb, var(--color-ink-500) ${heatPercent(s)}%, white)`).join(', ')})`,
+              }}
+            />
             Score 0 → 5
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span aria-hidden className="h-2.5 w-5 rounded-sm bg-white" style={{ boxShadow: 'inset 0 0 0 1.5px var(--color-brass-500)' }} />
+            Best in row
           </span>
           <span className="flex items-center gap-1.5">
             <span aria-hidden className="h-2.5 w-5 rounded-sm" style={{ background: HATCH }} />

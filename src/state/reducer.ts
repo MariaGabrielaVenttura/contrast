@@ -5,7 +5,7 @@ import type { CellKey, CellValue, CriterionDef, CriterionId, DocId, Scenario, Sc
 import { splitCellKey } from '../data/types';
 import type { ReviewAction } from '../lib/cells';
 import { isValidReview } from '../lib/cells';
-import { formatScore, formatValue } from '../lib/format';
+import { formatScore, formatValue, lowerFirst, possessive } from '../lib/format';
 import { distributeEvenly, largestRemainder, normalizeWeights } from '../lib/scoring';
 import type { AppState, AuditEntry, Filters, ScenarioSession, Setup, Stage, TabId, Toast, UiState, WhatIfState } from './types';
 
@@ -202,7 +202,6 @@ function reviewAudit(scenario: Scenario, s: ScenarioSession, key: CellKey, revie
           actor: 'Supplier (simulated)',
           action: 'supplier_reply',
           summary: `Supplier reply received for ${label}: ${describeValue(def, review.value)}.`,
-          note: review.sourceNote,
         };
       }
       return {
@@ -219,8 +218,7 @@ function reviewAudit(scenario: Scenario, s: ScenarioSession, key: CellKey, revie
       return {
         ...base,
         action: 'gap_accepted',
-        summary: `Decided without ${label}: risk accepted (scores 0).`,
-        note: review.reason,
+        summary: `Decided without ${possessive(s.nicknames[splitCellKey(key).docId])} ${lowerFirst(def.name)} (accepted risk, scores 0). Reason: ${review.reason}`,
       };
   }
 }

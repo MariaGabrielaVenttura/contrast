@@ -59,6 +59,9 @@ export function WelcomeModal() {
       </ol>
       <p className="mt-5 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
         Same engine, any industry. After this one, switch to IT vendor selection, contract risk review or company performance.
+        <span className="mt-2 block">
+          Criteria and weights are pre-set so you can see the result fast. Use Edit setup to change them anytime.
+        </span>
       </p>
     </Modal>
   );

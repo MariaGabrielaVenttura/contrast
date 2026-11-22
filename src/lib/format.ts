@@ -62,6 +62,11 @@ export function possessive(name: string): string {
   return /s$/i.test(name) ? `${name}'` : `${name}'s`;
 }
 
+/** "Regulatory inspection history" → "regulatory inspection history"; keeps acronyms ("NPS", "EBITDA margin"). */
+export function lowerFirst(name: string): string {
+  return /^[A-Z][a-z]/.test(name) ? name[0].toLowerCase() + name.slice(1) : name;
+}
+
 export function pluralize(n: number, singular: string, plural: string): string {
   return `${n} ${n === 1 ? singular : plural}`;
 }

@@ -4,7 +4,7 @@ import { getCriterion } from '../data/scenarios';
 import type { Scenario } from '../data/types';
 import { splitCellKey } from '../data/types';
 import type { ScenarioSession } from '../state/types';
-import { possessive } from './format';
+import { lowerFirst, possessive } from './format';
 
 export interface ChecklistStep {
   id: 1 | 2 | 3 | 4;
@@ -12,11 +12,6 @@ export interface ChecklistStep {
   /** Optional tip shown under the label. */
   hint?: string;
   done: boolean;
-}
-
-/** "Regulatory inspection history" → "regulatory inspection history"; keeps acronyms ("NPS"). */
-function lowerFirst(name: string): string {
-  return /^[A-Z][a-z]/.test(name) ? name[0].toLowerCase() + name.slice(1) : name;
 }
 
 export function gapStepLabel(scenario: Scenario, nickname: string): string {
