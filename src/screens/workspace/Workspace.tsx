@@ -49,7 +49,7 @@ export function Workspace() {
       className="flex flex-1 flex-col"
       activationMode="manual"
     >
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)] print:hidden">
+      <header className="z-30 border-b md:sticky md:top-0 border-slate-200 bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)] print:hidden">
         <WorkspaceHeader />
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Tabs.List aria-label="Workspace" className="mt-3 flex gap-1">

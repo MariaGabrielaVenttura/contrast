@@ -120,11 +120,11 @@ export function ReportDocument({ view, model }: { view: ScenarioView; model: Ins
               <li key={r.docId}>
                 <div className="flex items-baseline justify-between gap-2 text-sm">
                   <span className={cx('truncate', r.rank === 1 ? 'font-semibold text-ink-900' : 'text-slate-700')}>
-                    <span className="tabular-nums text-slate-500">#{r.rank}</span> {r.name}
+                    <span className="tabular-nums text-slate-600">#{r.rank}</span> {r.name}
                   </span>
                   <span className="shrink-0 tabular-nums">
                     <span className={cx('font-semibold', r.rank === 1 ? 'text-ink-900' : 'text-slate-800')}>{formatPercent(r.adherence)}</span>
-                    <span className="ml-1.5 text-xs text-slate-500">{formatTotal(r.total)} / 5</span>
+                    <span className="ml-1.5 text-xs text-slate-600">{formatTotal(r.total)} / 5</span>
                   </span>
                 </div>
                 <span aria-hidden className="mt-1 block h-2.5 overflow-hidden rounded-full bg-white ring-1 ring-ink-100">

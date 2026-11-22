@@ -6,6 +6,8 @@ import { reviewCounter } from '../../../lib/messages';
 import { useApp, useView } from '../../../state/AppContext';
 import { EvidencePanel } from './EvidencePanel';
 import { MatrixTable } from './MatrixTable';
+import { CriterionCards } from './CriterionCards';
+import { useIsDesktop } from '../../../hooks/useMediaQuery';
 import { buildRows, filterRows } from './model';
 
 function Legend() {
@@ -34,6 +36,7 @@ export function CompareTab() {
   const view = useView();
   const { session, pendingReviewKeys, gapKeys } = view;
   const rows = useMemo(() => buildRows(view), [view]);
+  const isDesktop = useIsDesktop();
   const visible = filterRows(rows, session.filters);
   const filtering = session.filters.needsReviewOnly || session.filters.onlyDifferences;
 
@@ -84,8 +87,10 @@ export function CompareTab() {
               {session.filters.needsReviewOnly && pendingReviewKeys.length === 0 ? 'Show all rows' : 'Clear filters'}
             </Button>
           </div>
-        ) : (
+        ) : isDesktop ? (
           <MatrixTable rows={visible} />
+        ) : (
+          <CriterionCards rows={visible} />
         )}
         {filtering && visible.length > 0 && (
           <p className="mt-2 text-sm text-slate-500">

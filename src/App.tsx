@@ -3,6 +3,7 @@ import { Footer } from './components/layout/Footer';
 import { TipProvider } from './components/ui/Tip';
 import { ToastRegion } from './components/ui/Toasts';
 import { AppProvider, useApp } from './state/AppContext';
+import { useIsDesktop } from './hooks/useMediaQuery';
 import { CriteriaStep } from './screens/setup/CriteriaStep';
 import { SetupStep } from './screens/setup/SetupStep';
 import { StartScreen } from './screens/start/StartScreen';
@@ -41,8 +42,10 @@ function useGlobalDropGuard() {
 /** Leaves room at the bottom so the floating demo guide never hides the end of the page. */
 function ChecklistSpacer({ children }: { children: ReactNode }) {
   const { state } = useApp();
+  const isDesktop = useIsDesktop();
   const open = !!state.activeScenarioId && state.ui.checklistOpen && !state.ui.welcomeOpen;
-  const pad = !open ? '' : state.ui.checklistCollapsed ? 'pb-20' : 'pb-80';
+  // Mobile shows a docked bar (the expanded sheet is modal); desktop shows a floating card.
+  const pad = !open ? '' : !isDesktop || state.ui.checklistCollapsed ? 'pb-20' : 'pb-80';
   return <div className={`flex min-h-dvh flex-col print:pb-0 ${pad}`}>{children}</div>;
 }
 

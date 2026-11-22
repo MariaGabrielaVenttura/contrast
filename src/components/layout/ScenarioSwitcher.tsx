@@ -6,7 +6,7 @@ import { newId, now, useApp } from '../../state/AppContext';
 export function ScenarioSwitcher() {
   const { state, dispatch } = useApp();
   return (
-    <Menu.Root open={state.ui.switcherOpen} onOpenChange={(open) => dispatch({ type: 'SET_UI', patch: { switcherOpen: open } })}>
+    <Menu.Root modal={false} open={state.ui.switcherOpen} onOpenChange={(open) => dispatch({ type: 'SET_UI', patch: { switcherOpen: open } })}>
       <Menu.Trigger asChild>
         <button
           type="button"
