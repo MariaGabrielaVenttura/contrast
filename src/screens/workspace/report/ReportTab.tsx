@@ -15,7 +15,7 @@ export function ReportTab() {
   const copy = useClipboard();
   const { scenario, analysis, nickname, cells, pendingReviewKeys, openRequestKeys } = view;
   const model = useMemo(
-    () => (analysis ? insightsModel(scenario, analysis, nickname, (k) => cells[k].status) : null),
+    () => (analysis ? insightsModel(scenario, analysis, nickname, cells) : null),
     [scenario, analysis, nickname, cells],
   );
   if (!model) return null;
@@ -56,7 +56,7 @@ export function ReportTab() {
     <div>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Executive report</h2>
+          <h2 className="font-display text-2xl font-semibold text-ink-900">Executive report</h2>
           <p className="text-sm text-slate-600">One-page brief. Updates instantly with every review decision.</p>
         </div>
         <div className="flex gap-2">

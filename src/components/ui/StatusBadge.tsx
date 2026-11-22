@@ -6,9 +6,9 @@ import { cx } from './cx';
 const styles: Record<CellStatus, { cls: string; Icon: typeof Mail | null }> = {
   auto: { cls: 'border-slate-200 bg-white text-slate-600', Icon: null },
   needs_review: { cls: 'border-orange-300 bg-orange-50 text-orange-800', Icon: TriangleAlert },
-  human_verified: { cls: 'border-indigo-200 bg-indigo-50 text-indigo-800', Icon: BadgeCheck },
-  human_edited: { cls: 'border-indigo-200 bg-indigo-50 text-indigo-800', Icon: Pencil },
-  human_provided: { cls: 'border-indigo-200 bg-indigo-50 text-indigo-800', Icon: UserCheck },
+  human_verified: { cls: 'border-ink-200 bg-ink-50 text-ink-800', Icon: BadgeCheck },
+  human_edited: { cls: 'border-ink-200 bg-ink-50 text-ink-800', Icon: Pencil },
+  human_provided: { cls: 'border-ink-200 bg-ink-50 text-ink-800', Icon: UserCheck },
   not_found: { cls: 'border-slate-300 bg-slate-100 text-slate-700', Icon: CircleSlash },
   info_requested: { cls: 'border-sky-200 bg-sky-50 text-sky-800', Icon: Mail },
   accepted_gap: { cls: 'border-slate-300 bg-slate-100 text-slate-700', Icon: CircleMinus },

@@ -47,14 +47,14 @@ describe('resolveCell', () => {
       isGap: true,
       value: null,
     });
-    expect(resolveCell('d_inspection|pacifico', seed, { type: 'accept_gap', at })).toMatchObject({
+    expect(resolveCell('d_inspection|pacifico', seed, { type: 'accept_gap', reason: 'Low weight', at })).toMatchObject({
       status: 'accepted_gap',
       isGap: true,
     });
   });
   it('ignores review actions that do not apply to the seed', () => {
     expect(resolveCell('d_inspection|pacifico', D.cells['d_inspection|pacifico'], { type: 'confirm', at }).status).toBe('not_found');
-    expect(resolveCell('d_purity|helix', D.cells['d_purity|helix'], { type: 'accept_gap', at }).status).toBe('auto');
+    expect(resolveCell('d_purity|helix', D.cells['d_purity|helix'], { type: 'accept_gap', reason: 'Low weight', at }).status).toBe('auto');
   });
 });
 

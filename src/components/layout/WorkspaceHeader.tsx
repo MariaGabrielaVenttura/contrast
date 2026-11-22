@@ -41,10 +41,10 @@ export function WorkspaceHeader() {
         </div>
       </div>
       <div className="mt-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-indigo-700">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brass-700">
           {scenario.title} · {scenario.industryTag}
         </p>
-        <h1 className="mt-0.5 line-clamp-2 text-lg font-semibold leading-snug text-slate-900 sm:text-xl" title={scenario.question}>
+        <h1 className="mt-0.5 line-clamp-2 text-xl font-semibold leading-snug text-ink-900 sm:text-2xl" title={scenario.question}>
           {scenario.question}
         </h1>
         <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Documents">

@@ -50,7 +50,7 @@ export function WelcomeModal() {
           "Fix what the AI wasn't sure about, and see how one missing answer can change the decision.",
         ].map((t, i) => (
           <li key={t} className="flex gap-3">
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-ink-100 text-xs font-semibold text-ink-700">
               {i + 1}
             </span>
             <span>{t}</span>

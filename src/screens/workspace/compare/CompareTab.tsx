@@ -24,7 +24,7 @@ function Legend() {
           {i.label}
         </li>
       ))}
-      <li className="text-slate-500">% = simulated AI confidence</li>
+      <li className="text-slate-500">Simulated AI confidence is shown only when below 70%; open any cell to see it.</li>
     </ul>
   );
 }
@@ -52,7 +52,7 @@ export function CompareTab() {
     <section aria-labelledby="matrix-heading">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 id="matrix-heading" tabIndex={-1} className="text-lg font-semibold text-slate-900">
+          <h2 id="matrix-heading" tabIndex={-1} className="font-display text-2xl font-semibold text-ink-900">
             Side-by-side comparison
           </h2>
           <p className="text-sm font-medium text-slate-700" aria-live="polite">
@@ -90,7 +90,7 @@ export function CompareTab() {
         {filtering && visible.length > 0 && (
           <p className="mt-2 text-sm text-slate-500">
             Showing {visible.length} of {rows.length} criteria. Totals always include every criterion.{' '}
-            <button type="button" className="font-medium text-indigo-700 underline-offset-2 hover:underline" onClick={() => dispatch({ type: 'CLEAR_FILTERS' })}>
+            <button type="button" className="font-medium text-ink-700 underline-offset-2 hover:underline" onClick={() => dispatch({ type: 'CLEAR_FILTERS' })}>
               Clear filters
             </button>
           </p>

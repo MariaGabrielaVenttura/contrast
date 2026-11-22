@@ -876,3 +876,41 @@ Every phase ends with `npm run test` and `npm run build` green, then a git commi
    - Check 375px on every tab with no horizontal scroll.
 
 This plan is saved as `PLAN.md` in the project root. Implementation follows the §10 order and stop points.
+
+---
+
+## 13. Change request (before first deploy): gap decisions, visual identity, fixes
+
+**Gap handling as a decision** (replaces the earlier gap flow)
+- A Not found cell offers three choices, each with its consequence:
+  - "Add value (I have it)"
+  - "Request from supplier"
+  - "Decide without it (accept risk, scores 0)", which requires a short reason. The reason appears in the audit trail and the report.
+- The evidence panel title follows the status: "Missing from document" / "Awaiting supplier reply" / "Accepted risk" / the value. The eyebrow shows document · criterion.
+- Info requested cells on the scenario's demo gap get "Simulate supplier reply". It fills `demo.suggestedValue` with source "Supplier reply (simulated)" and is logged as actor "Supplier (simulated)". The ranking toast fires as usual. Other gaps have no SPEC value, so they get no simulated reply.
+- **Decision status** (`src/lib/decision.ts`, pure). It only counts gaps of non-#1 documents whose tipping result is threshold, boolean or decisive ("changers"). Precedence, top first:
+  1. "Needs a decision — N missing value(s) could change #1": an untouched Not found changer. This fills the case the request did not name.
+  2. "Provisional — N pending answer(s) could change #1": an info request open on a changer.
+  3. "Decided with N accepted risk(s)": an accepted gap that is a changer.
+  4. "Ready to decide": no open gap can change #1.
+
+  For 1 and 2, the headline reads "Provisional recommendation: {doc} — x%". The status is shown in Insights and at the top of the Report.
+- **Checklist step 3:** "Decide what to do with {doc}'s missing {criterion}". It completes on add value, request info or accept risk. The SPEC step text stays visible as a tip.
+- **Tests:** decision status for every scenario state, and the step-3 completion paths.
+
+**Visual identity**
+- Ink-navy primary (`ink-*` scale replaces indigo) plus one warm brass accent for brand details only. Green, amber, orange and red keep their status meanings.
+- Fraunces (self-hosted) for headings; Inter for body text.
+- Two-halves logo mark (navy + brass).
+- Matrix: the confidence pill shows only below 70% or on human-touched cells. Each score gets a small bar plus its number.
+- Start screen: a static result preview computed by the engine (Pacífico Labs 3rd → 1st).
+- Report as a decision brief:
+  - verdict block with the status stamp, winner and per-document score bars
+  - numbered sections
+  - heatmap matrix (tint by score, hatched gaps, icons for human-touched cells)
+  - audit trail grouped by date, with times per row
+  - sign-off block
+
+**Fixes**
+- Print: `@page { margin: 0 }` with inner padding, so the browser's header and footer don't print. Fit the content to A4 portrait width, and verify by rendering a PDF.
+- Focus ring for keyboard only: input-modality tracking (`html[data-input="keyboard"]`), no outline on programmatic focus targets (`tabindex="-1"`).

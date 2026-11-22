@@ -32,10 +32,10 @@ export function UploadDropzone() {
       onDrop={onDrop}
       className={cx(
         'flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-6 py-8 text-center transition-colors',
-        over ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 bg-slate-50',
+        over ? 'border-ink-500 bg-ink-50' : 'border-slate-300 bg-slate-50',
       )}
     >
-      <UploadCloud className="size-8 text-indigo-600" aria-hidden />
+      <UploadCloud className="size-8 text-ink-600" aria-hidden />
       <div>
         <p className="font-medium text-slate-900">{over ? 'Drop to try' : 'Drop 2–4 documents here'}</p>
         <p className="text-sm text-slate-500">PDF, DOCX, XLSX or CSV</p>

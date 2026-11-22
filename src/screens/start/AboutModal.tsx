@@ -42,7 +42,7 @@ export function AboutModal() {
       <div className="space-y-4">
         {sections.map(({ icon: Icon, title, body }) => (
           <section key={title} className="flex gap-3">
-            <Icon className="mt-0.5 size-5 shrink-0 text-indigo-600" aria-hidden />
+            <Icon className="mt-0.5 size-5 shrink-0 text-ink-600" aria-hidden />
             <div>
               <h3 className="font-semibold text-slate-900">{title}</h3>
               <p className="text-sm text-slate-600">{body}</p>

@@ -49,7 +49,7 @@ export function Workspace() {
       className="flex flex-1 flex-col"
       activationMode="manual"
     >
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur print:hidden">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)] print:hidden">
         <WorkspaceHeader />
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Tabs.List aria-label="Workspace" className="mt-3 flex gap-1">
@@ -60,7 +60,7 @@ export function Workspace() {
                 aria-label={t.id === 'report' && pending > 0 ? `Report, ${pending} ${pending === 1 ? 'item' : 'items'} pending review` : undefined}
                 className={cx(
                   'relative inline-flex h-10 flex-1 items-center justify-center gap-2 border-b-2 px-4 text-sm font-medium transition-colors sm:flex-none',
-                  'border-transparent text-slate-600 hover:text-slate-900 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-700',
+                  'border-transparent text-slate-600 hover:text-slate-900 data-[state=active]:border-ink-600 data-[state=active]:text-ink-700',
                 )}
               >
                 {t.label}
@@ -84,13 +84,13 @@ export function Workspace() {
         </div>
       )}
       <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 print:max-w-none print:p-0">
-        <Tabs.Content value="compare" className="outline-none">
+        <Tabs.Content value="compare" className="rounded-lg">
           <CompareTab />
         </Tabs.Content>
-        <Tabs.Content value="insights" className="outline-none">
+        <Tabs.Content value="insights" className="rounded-lg">
           <InsightsTab />
         </Tabs.Content>
-        <Tabs.Content value="report" className="outline-none">
+        <Tabs.Content value="report" className="rounded-lg">
           <ReportTab />
         </Tabs.Content>
       </main>

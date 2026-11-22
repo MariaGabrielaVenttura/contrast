@@ -114,6 +114,56 @@ describe('reducer', () => {
     expect(v.gapKeys).toContain('a_sla|beta');
   });
 
+  it.each([
+    ['add value', { type: 'provide', value: { kind: 'qualitative', score: 5, text: 'No observations' }, sourceNote: 'QA email', at }],
+    ['request info', { type: 'request_info', message: 'Hello', at }],
+    ['accept risk', { type: 'accept_gap', reason: 'Inspection history is checked during the audit', at }],
+  ] as const)('checklist step 3 completes on %s', (_, review) => {
+    const s = apply(initialState, quick('D'), { type: 'REVIEW', key: 'd_inspection|pacifico', review, id: id() });
+    const step = view(s).checklist[2];
+    expect(step.label).toBe("Decide what to do with Pacífico Labs' missing regulatory inspection history");
+    expect(step.hint).toContain('watch it jump from 3rd to 1st');
+    expect(step.done).toBe(true);
+  });
+
+  it('checklist step 3 is not done by actions on other gaps; label follows the nickname', () => {
+    const s = apply(
+      initialState,
+      quick('A'),
+      { type: 'REVIEW', key: 'a_sla|beta', review: { type: 'request_info', message: 'Hello', at }, id: id() },
+      { type: 'SET_NICKNAME', docId: 'gamma', value: 'Gamma Ltd' },
+    );
+    expect(view(s).checklist[2]).toMatchObject({ done: false, label: "Decide what to do with Gamma Ltd's missing senior consultants on the team" });
+  });
+
+  it('accepting a risk records the reason; a simulated supplier reply fills the value and is logged', () => {
+    let s = apply(initialState, quick('D'), {
+      type: 'REVIEW',
+      key: 'd_inspection|pacifico',
+      review: { type: 'accept_gap', reason: 'Checked in the on-site audit', at },
+      id: id(),
+    });
+    expect(s.sessions.D!.audit.at(-1)).toMatchObject({ action: 'gap_accepted', note: 'Checked in the on-site audit' });
+    s = apply(
+      s,
+      { type: 'REVIEW', key: 'd_inspection|pacifico', review: { type: 'request_info', message: 'm', at }, id: id() },
+      {
+        type: 'REVIEW',
+        key: 'd_inspection|pacifico',
+        review: {
+          type: 'provide',
+          value: SCENARIOS.D.demo.suggestedValue,
+          sourceNote: 'Supplier reply (simulated)',
+          via: 'supplier_reply',
+          at,
+        },
+        id: id(),
+      },
+    );
+    expect(s.sessions.D!.audit.at(-1)).toMatchObject({ actor: 'Supplier (simulated)', action: 'supplier_reply' });
+    expect(view(s).analysis!.results.byDoc.pacifico.adherenceTenths).toBe(966);
+  });
+
   it('checklist steps 3 and 4 auto-check', () => {
     let s = apply(initialState, quick('C'), {
       type: 'REVIEW',

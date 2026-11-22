@@ -45,7 +45,7 @@ export function DemoChecklist() {
       data-testid="demo-checklist"
     >
       <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
-        <ListChecks className="size-5 text-indigo-600" aria-hidden />
+        <ListChecks className="size-5 text-ink-600" aria-hidden />
         <div className="min-w-0 flex-1">
           <h2 id="checklist-title" className="text-sm font-semibold text-slate-900">
             Try this demo in 4 steps
@@ -94,11 +94,12 @@ export function DemoChecklist() {
                       <span className="sr-only">{step.done ? 'Done: ' : 'To do: '}</span>
                       {step.label}
                     </p>
+                    {step.hint && !step.done && <p className="mt-0.5 text-xs text-slate-500">{step.hint}</p>}
                     {action && (
                       <button
                         type="button"
                         onClick={action}
-                        className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 underline-offset-2 hover:underline"
+                        className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-ink-700 underline-offset-2 hover:underline"
                       >
                         Show me <ArrowRight className="size-3" aria-hidden />
                       </button>
@@ -112,13 +113,13 @@ export function DemoChecklist() {
           {complete && (
             <div className="mt-4 space-y-3 border-t border-slate-100 pt-4" data-testid="checklist-complete">
               {WHAT_IF_AVAILABLE && (
-                <p className="flex gap-2 rounded-xl bg-indigo-50 px-3 py-2 text-sm text-indigo-900">
+                <p className="flex gap-2 rounded-xl bg-ink-50 px-3 py-2 text-sm text-ink-900">
                   <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden />
                   Bonus: drag a weight in What-if and watch the ranking and report update instantly.
                 </p>
               )}
               <p className="flex gap-2 text-sm font-medium text-slate-900">
-                <PartyPopper className="mt-0.5 size-4 shrink-0 text-indigo-600" aria-hidden />
+                <PartyPopper className="mt-0.5 size-4 shrink-0 text-ink-600" aria-hidden />
                 That's Contrast: from documents to a defensible decision in minutes. Same engine, any industry. Try another:
               </p>
               <div className="flex flex-col gap-2">
@@ -127,13 +128,13 @@ export function DemoChecklist() {
                     key={id}
                     type="button"
                     onClick={() => dispatch({ type: 'QUICK_START', scenarioId: id, at: now(), id: newId('audit'), withWelcome: false })}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-indigo-300 hover:bg-indigo-50"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-ink-300 hover:bg-ink-50"
                   >
                     <span>
                       <span className="block font-medium text-slate-900">{SCENARIOS[id].title}</span>
                       <span className="block text-xs text-slate-500">{SCENARIOS[id].industryTag}</span>
                     </span>
-                    <ArrowRight className="size-4 text-indigo-600" aria-hidden />
+                    <ArrowRight className="size-4 text-ink-600" aria-hidden />
                   </button>
                 ))}
               </div>

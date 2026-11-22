@@ -1,7 +1,8 @@
 import { Repeat, Trophy } from 'lucide-react';
 import { BelowMarker, BestMarker, StatusBadge } from '../../../components/ui/StatusBadge';
 import { cx } from '../../../components/ui/cx';
-import { formatPercent, formatScore, formatTotal } from '../../../lib/format';
+import { ScoreBar } from '../../../components/ui/ScoreBar';
+import { formatPercent, formatTotal } from '../../../lib/format';
 import { useApp, useView } from '../../../state/AppContext';
 import { RuleChip } from '../../setup/CriteriaStep';
 import type { CellInfo, RowInfo } from './model';
@@ -18,7 +19,7 @@ export function CellButton({ cell, onOpen }: { cell: CellInfo; onOpen: () => voi
       aria-label={cell.ariaLabel}
       onClick={onOpen}
       className={cx(
-        'flex h-full w-full flex-col items-start gap-2 rounded-xl border p-3 text-left transition-colors hover:border-indigo-400 hover:shadow-sm',
+        'flex h-full w-full flex-col items-start gap-2 rounded-xl border p-3 text-left transition-colors hover:border-ink-400 hover:shadow-sm',
         cell.isBest && 'border-emerald-300 bg-emerald-50/60',
         cell.isBelow && 'border-amber-300 bg-amber-50/60',
         resolved.isGap && 'border-dashed border-slate-300 bg-slate-50',
@@ -29,11 +30,9 @@ export function CellButton({ cell, onOpen }: { cell: CellInfo; onOpen: () => voi
       <span className={cx('break-words text-sm font-medium text-slate-900', isQual && 'line-clamp-2', resolved.isGap && 'text-slate-400')}>
         {resolved.isGap ? '—' : cell.valueText}
       </span>
-      <span className="text-xs tabular-nums text-slate-600">
-        Score <span className="font-semibold text-slate-900">{formatScore(cell.score)}</span>
-      </span>
-      <span className="flex flex-wrap items-center gap-1">
-        <StatusBadge status={resolved.status} confidence={cell.confidence} />
+      <ScoreBar score={cell.score} muted={resolved.isGap} />
+      <span className="flex flex-wrap items-center gap-1 empty:hidden">
+        {resolved.status !== 'auto' && <StatusBadge status={resolved.status} confidence={cell.confidence} />}
         {cell.isBest && <BestMarker />}
         {cell.isBelow && <BelowMarker />}
         {converted && (
@@ -82,7 +81,7 @@ export function MatrixTable({ rows }: { rows: RowInfo[] }) {
               <th scope="row" className="px-4 py-3 text-left font-normal">
                 <span className="block text-sm font-semibold text-slate-900">{row.def.name}</span>
                 <span className="mt-1 flex flex-wrap items-center gap-1.5">
-                  <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-indigo-700">
+                  <span className="rounded-md bg-ink-50 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-ink-700">
                     {row.weight}%
                   </span>
                   <RuleChip def={row.def} />
@@ -114,7 +113,7 @@ export function MatrixTable({ rows }: { rows: RowInfo[] }) {
                     <span
                       className={cx(
                         'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
-                        first ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700',
+                        first ? 'bg-ink-600 text-white' : 'bg-slate-200 text-slate-700',
                       )}
                     >
                       {first && <Trophy className="size-3.5" aria-hidden />}

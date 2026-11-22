@@ -1,14 +1,21 @@
 import { Info } from 'lucide-react';
 import { Tip } from '../ui/Tip';
 
+/** Two contrasting halves: ink and brass. */
+export function LogoMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden focusable="false">
+      <path d="M10 2h6v28h-6a8 8 0 0 1-8-8V10a8 8 0 0 1 8-8z" fill="var(--color-ink-700)" />
+      <path d="M16 2h6a8 8 0 0 1 8 8v12a8 8 0 0 1-8 8h-6z" fill="var(--color-brass-400)" />
+    </svg>
+  );
+}
+
 export function Wordmark({ onClick }: { onClick?: () => void }) {
   const content = (
     <>
-      <span aria-hidden className="flex size-7 items-center justify-center gap-0.5 rounded-lg bg-indigo-600">
-        <span className="h-3.5 w-1.5 rounded-sm bg-white" />
-        <span className="h-3.5 w-1.5 rounded-sm bg-white/55" />
-      </span>
-      <span className="text-lg font-semibold tracking-tight text-slate-900">Contrast</span>
+      <LogoMark className="size-7" />
+      <span className="font-display text-xl font-semibold tracking-tight text-ink-900">Contrast</span>
     </>
   );
   return onClick ? (

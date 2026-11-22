@@ -26,7 +26,7 @@ export function SetupLayout({ step, children }: { step: 1 | 2; children: ReactNo
                     <span
                       className={cx(
                         'flex size-6 items-center justify-center rounded-full text-xs font-semibold',
-                        current ? 'bg-indigo-600 text-white' : done ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500',
+                        current ? 'bg-ink-600 text-white' : done ? 'bg-ink-100 text-ink-700' : 'bg-slate-100 text-slate-500',
                       )}
                     >
                       {done ? <Check className="size-3.5" aria-hidden /> : n}
@@ -54,7 +54,7 @@ export function SetupLayout({ step, children }: { step: 1 | 2; children: ReactNo
       </header>
       {scenario.disclaimerBanner && <DisclaimerBanner text={scenario.disclaimerBanner} />}
       <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
-        <p className="text-sm font-medium text-indigo-700">
+        <p className="text-sm font-semibold text-brass-700">
           {scenario.title} · Step {step} of 2
         </p>
         {children}

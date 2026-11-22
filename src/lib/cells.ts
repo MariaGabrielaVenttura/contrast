@@ -16,9 +16,9 @@ export type CellStatus =
 export type ReviewAction =
   | { type: 'confirm'; at: string }
   | { type: 'edit'; value: CellValue; note: string; at: string }
-  | { type: 'provide'; value: CellValue; sourceNote: string; at: string }
+  | { type: 'provide'; value: CellValue; sourceNote: string; at: string; via?: 'supplier_reply' }
   | { type: 'request_info'; message: string; at: string }
-  | { type: 'accept_gap'; at: string };
+  | { type: 'accept_gap'; reason: string; at: string };
 
 export interface ResolvedCell {
   key: CellKey;

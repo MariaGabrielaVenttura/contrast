@@ -2,6 +2,32 @@
 
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+
+  /* Deep ink navy: primary actions, text accents, focus. */
+  --color-ink-50: #f3f5f9;
+  --color-ink-100: #e4e8f0;
+  --color-ink-200: #c8d0df;
+  --color-ink-300: #9eabc4;
+  --color-ink-400: #6f7fa0;
+  --color-ink-500: #46577a;
+  --color-ink-600: #1f2f4f;
+  --color-ink-700: #16233d;
+  --color-ink-800: #101a2e;
+  --color-ink-900: #0b1322;
+  --color-ink-950: #070c16;
+
+  /* Warm brass: brand details only (logo, eyebrows, highlights). Never a status color. */
+  --color-brass-50: #fbf6ec;
+  --color-brass-100: #f5e9cf;
+  --color-brass-200: #ead29f;
+  --color-brass-300: #dcb46b;
+  --color-brass-400: #cf9a45;
+  --color-brass-500: #b98031;
+  --color-brass-600: #9c6726;
+  --color-brass-700: #7c5020;
+  --color-brass-800: #5f3d1b;
+  --color-brass-900: #4a3017;
 }
 
 @layer base {
@@ -12,10 +38,27 @@
     @apply bg-white text-slate-900 antialiased;
     font-family: var(--font-sans);
   }
+  h1,
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: var(--color-brass-200);
+  }
+  /* Focus ring for keyboard users only. html[data-input] is set by main.tsx. */
   :focus-visible {
-    outline: 2px solid var(--color-indigo-600);
+    outline: 2px solid var(--color-ink-600);
     outline-offset: 2px;
-    border-radius: 0.375rem;
+  }
+  html:not([data-input='keyboard']) :focus-visible {
+    outline: none;
+  }
+  /* Programmatic focus targets (headings) never show a ring. */
+  [tabindex='-1']:focus,
+  [tabindex='-1']:focus-visible {
+    outline: none;
   }
 }
 
@@ -28,23 +71,56 @@
   }
 }
 
+/* Print: margin 0 removes the browser's URL/date/page header and footer; the report pads itself. */
 @page {
   size: A4 portrait;
-  margin: 12mm;
+  margin: 0;
 }
 
 @media print {
   html,
   body {
     background: #fff;
-    font-size: 9pt;
+    margin: 0;
+    padding: 0;
+    width: 210mm;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* The report is laid out at a wider virtual width and zoomed to exactly fit A4. */
+  .report {
+    zoom: 0.6;
+    width: calc(210mm / 0.6);
+    max-width: none !important;
+    margin: 0 !important;
+    padding: calc(10mm / 0.6) calc(13mm / 0.6) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .report > :not(:first-child) {
+    margin-top: 1rem !important;
+  }
+  .report td {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+  .report [aria-label='Verdict'] {
+    padding: 0.9rem 1.1rem !important;
+  }
+  .report [aria-label='Verdict'] .mt-3 {
+    margin-top: 0.5rem !important;
+  }
+  .report h3 + div {
+    margin-top: 0.4rem !important;
+  }
+  .report dd {
+    margin-top: 0.75rem !important;
   }
   .report section,
   .report tr {
     break-inside: avoid;
-  }
-  .report * {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
 }

@@ -1,7 +1,8 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowRight, Calculator, Copy, FileText, Lightbulb, Quote, Repeat, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Calculator, Copy, FileText, FlaskConical, Lightbulb, MailCheck, Plus, Quote, Repeat, Send, ShieldOff, Sparkles, X } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Button } from '../../../components/ui/Button';
+import { ScoreBar } from '../../../components/ui/ScoreBar';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { useToast } from '../../../components/ui/Toasts';
 import { cx } from '../../../components/ui/cx';
@@ -9,10 +10,11 @@ import { getCriterion } from '../../../data/scenarios';
 import type { CellKey, CellValue, CriterionDef } from '../../../data/types';
 import { cellKey, REVIEW_THRESHOLD, splitCellKey } from '../../../data/types';
 import { useClipboard } from '../../../hooks/useClipboard';
-import { availableActions, type ResolvedCell } from '../../../lib/cells';
+import { availableActions, type ResolvedCell, type ReviewAction } from '../../../lib/cells';
 import { formatAmount, formatNumber, formatScore, formatValue } from '../../../lib/format';
 import { infoRequestMessage, tippingSentence } from '../../../lib/messages';
 import { GAP_RULE, ruleExplanation } from '../../../lib/rules';
+import { describeValue } from '../../../state/reducer';
 import { newId, now, useApp, useView } from '../../../state/AppContext';
 import type { ScenarioView } from '../../../state/selectors';
 
@@ -141,7 +143,7 @@ function ValueForm({ def, mode, initial, placeholderValue, onSubmit, onCancel }:
     def.kind === 'qualitative' ? 'Score (0–5)' : def.kind === 'number' ? `${def.name} (${def.unit.label})` : def.name;
 
   return (
-    <form onSubmit={submit} noValidate className="space-y-4 rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">
+    <form onSubmit={submit} noValidate className="space-y-4 rounded-xl border border-ink-200 bg-ink-50/40 p-4">
       <p className="text-sm font-semibold text-slate-900">{mode === 'provide' ? 'Add value' : 'Edit value'}</p>
       {def.kind === 'boolean' ? (
         <fieldset aria-describedby={errors.value ? `${uid}-ve` : undefined}>
@@ -155,7 +157,7 @@ function ValueForm({ def, mode, initial, placeholderValue, onSubmit, onCancel }:
                   name={`${uid}-bool`}
                   checked={bool === b}
                   onChange={() => setBool(b)}
-                  className="accent-indigo-600"
+                  className="accent-ink-600"
                 />
                 {b ? 'Yes' : 'No'}
               </label>
@@ -255,6 +257,126 @@ function InfoRequestDraft({ message }: { message: string }) {
   );
 }
 
+// ---------- gap decision ----------
+
+type Choice = 'add' | 'request' | 'accept';
+
+const CHOICE_COPY: Record<Choice, { title: string; consequence: (doc: string) => string; Icon: typeof Plus }> = {
+  add: {
+    title: 'Add value (I have it)',
+    consequence: () => "Enter the value and where it came from. It's scored like any other value and the ranking updates.",
+    Icon: Plus,
+  },
+  request: {
+    title: 'Request from supplier',
+    consequence: (doc) =>
+      `Drafts a ready-to-copy message to ${doc}. Scores 0 until they reply, and the recommendation stays provisional if this gap could change #1.`,
+    Icon: Send,
+  },
+  accept: {
+    title: 'Decide without it (accept risk, scores 0)',
+    consequence: () => "Records that you're deciding without this value. It keeps scoring 0. Needs a short reason for the audit trail and report.",
+    Icon: ShieldOff,
+  },
+};
+
+function GapChoices({ choices, docName, onChoose }: { choices: Choice[]; docName: string; onChoose: (c: Choice) => void }) {
+  return (
+    <fieldset>
+      <legend className="text-sm font-semibold text-slate-900">What do you want to do?</legend>
+      <div className="mt-2 space-y-2">
+        {choices.map((c) => {
+          const { title, consequence, Icon } = CHOICE_COPY[c];
+          return (
+            <button
+              key={c}
+              type="button"
+              onClick={() => onChoose(c)}
+              className="flex w-full items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition-colors hover:border-ink-400 hover:bg-ink-50"
+            >
+              <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-ink-50 text-ink-700">
+                <Icon className="size-4" aria-hidden />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold text-slate-900">{title}</span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-slate-600">{consequence(docName)}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function ReasonForm({ onSubmit, onCancel }: { onSubmit: (reason: string) => void; onCancel: () => void }) {
+  const uid = useId();
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState('');
+  useEffect(() => ref.current?.focus(), []);
+  return (
+    <form
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!reason.trim()) {
+          setError('Add a short reason.');
+          ref.current?.focus();
+          return;
+        }
+        onSubmit(reason.trim());
+      }}
+      className="space-y-3 rounded-xl border border-slate-300 bg-slate-50 p-4"
+    >
+      <p className="text-sm font-semibold text-slate-900">Decide without it</p>
+      <p className="text-xs text-slate-600">The value keeps scoring 0. Your reason is shown in the audit trail and the report.</p>
+      <div>
+        <label htmlFor={uid} className="block text-sm font-medium text-slate-800">
+          Reason
+        </label>
+        <textarea
+          ref={ref}
+          id={uid}
+          rows={2}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="e.g., Checked during the on-site audit; low impact for this decision"
+          aria-invalid={!!error}
+          aria-describedby={error ? `${uid}-e` : undefined}
+          className={cx('mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm', error ? 'border-red-500' : 'border-slate-300')}
+        />
+        {error && (
+          <p id={`${uid}-e`} className="mt-1 text-xs font-medium text-red-700">
+            {error}
+          </p>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit" variant="primary" size="sm">
+          Accept risk
+        </Button>
+        <Button size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function panelTitle(def: CriterionDef, cell: ResolvedCell): string {
+  switch (cell.status) {
+    case 'not_found':
+      return 'Missing from document';
+    case 'info_requested':
+      return 'Awaiting supplier reply';
+    case 'accepted_gap':
+      return 'Accepted risk';
+    default:
+      return formatValue(def, cell.value);
+  }
+}
+
 // ---------- panel body ----------
 
 function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
@@ -262,7 +384,7 @@ function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
   const view = useView();
   const toast = useToast();
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const [mode, setMode] = useState<'view' | 'edit' | 'provide'>('view');
+  const [mode, setMode] = useState<'view' | 'edit' | 'provide' | 'accept'>('view');
   const { scenario } = view;
   const { criterionId, docId } = splitCellKey(cellKeyValue);
   const def = getCriterion(scenario, criterionId);
@@ -274,6 +396,7 @@ function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
   const tipping = view.analysis?.tipping[cellKeyValue];
   const nextPending = view.pendingReviewKeys.find((k) => k !== cellKeyValue);
   const review = cell.review;
+  const isDemoGap = cellKeyValue === scenario.demo.gapCell;
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -285,6 +408,7 @@ function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
     setMode('view');
     window.setTimeout(() => headingRef.current?.focus(), 0);
   };
+  const review$ = (r: ReviewAction, message: string) => act({ type: 'REVIEW', key: cellKeyValue, review: r, id: newId('audit') }, message);
 
   const draftRequest = () => {
     const message = infoRequestMessage({
@@ -294,24 +418,49 @@ function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
       question: scenario.question,
       ask: def.infoRequestAsk,
     });
-    act({ type: 'REVIEW', key: cellKeyValue, review: { type: 'request_info', message, at: now() }, id: newId('audit') }, 'Info request drafted. Status set to Info requested.');
+    review$({ type: 'request_info', message, at: now() }, 'Info request drafted. Status set to Info requested.');
   };
 
-  const humanNote =
-    review?.type === 'edit' ? review.note : review?.type === 'provide' ? review.sourceNote : undefined;
+  const simulateReply = () =>
+    review$(
+      { type: 'provide', value: scenario.demo.suggestedValue, sourceNote: 'Supplier reply (simulated)', via: 'supplier_reply', at: now() },
+      'Supplier reply received (simulated). Scores recalculated.',
+    );
+
+  const choose = (c: Choice) => {
+    if (c === 'add') setMode('provide');
+    else if (c === 'accept') setMode('accept');
+    else draftRequest();
+  };
+
+  const gapChoices: Choice[] = cell.isGap
+    ? (['add', 'request', 'accept'] as Choice[]).filter(
+        (c) => (c === 'add' && actions.includes('add_value')) || (c === 'request' && actions.includes('request_info')) || (c === 'accept' && actions.includes('accept_gap')),
+      )
+    : [];
+
+  const humanNote = review?.type === 'edit' ? review.note : review?.type === 'provide' ? review.sourceNote : undefined;
+  const titleText = panelTitle(def, cell);
 
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{doc.nickname}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-brass-700">
+            {doc.nickname} · {def.name}
+          </p>
           <Dialog.Title asChild>
-            <h2 ref={headingRef} tabIndex={-1} className="mt-0.5 text-lg font-semibold text-slate-900">
-              {def.name}
+            <h2
+              ref={headingRef}
+              tabIndex={-1}
+              data-testid="panel-title"
+              className={cx('mt-1 break-words font-display font-semibold tracking-tight text-slate-900', titleText.length > 40 ? 'text-lg' : 'text-2xl')}
+            >
+              {titleText}
             </h2>
           </Dialog.Title>
           <Dialog.Description className="sr-only">
-            Evidence, scoring rule and review actions for {def.name} in {doc.nickname}.
+            {def.name} in {doc.nickname}: evidence, scoring rule and actions.
           </Dialog.Description>
         </div>
         <Dialog.Close aria-label="Close details" className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800">
@@ -320,36 +469,54 @@ function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <StatusBadge status={cell.status} confidence={seed.extraction === 'found' ? seed.confidence : undefined} size="md" />
+          <ScoreBar score={score} muted={cell.isGap} />
           {seed.extraction === 'found' && (
             <span className="text-sm text-slate-600">
               {seed.confidence < REVIEW_THRESHOLD
-                ? `Confidence ${seed.confidence}% — below the ${REVIEW_THRESHOLD}% review threshold`
-                : `Confidence ${seed.confidence}%`}
+                ? `AI confidence ${seed.confidence}% (below the ${REVIEW_THRESHOLD}% review threshold)`
+                : `AI confidence ${seed.confidence}%`}
             </span>
           )}
         </div>
 
-        <div>
-          <p className="break-words text-2xl font-semibold tracking-tight text-slate-900">
-            {cell.isGap ? 'Not found' : formatValue(def, cell.value)}
-          </p>
-          <p className="mt-1 text-sm tabular-nums text-slate-600">
-            Score <span className="font-semibold text-slate-900">{formatNumber(score, 2)}</span> / 5
-          </p>
-        </div>
-
         {(review?.type === 'edit' || review?.type === 'provide' || review?.type === 'confirm') && (
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-3 text-sm text-indigo-950">
+          <div className="rounded-xl border border-ink-200 bg-ink-50 p-3 text-sm text-ink-900">
             {review.type === 'confirm' && 'You confirmed the extracted value.'}
-            {review.type === 'edit' && (
-              <>
-                You edited this value. Extracted value: {seed.extraction === 'found' ? formatValue(def, seed.value) : '—'}.
-              </>
+            {review.type === 'edit' && <>You edited this value. Extracted value: {seed.extraction === 'found' ? formatValue(def, seed.value) : '—'}.</>}
+            {review.type === 'provide' &&
+              (review.via === 'supplier_reply' ? 'The supplier replied to your request (simulated).' : 'You provided this value. It was not in the document.')}
+            {humanNote && <p className="mt-1">Source: {humanNote}</p>}
+          </div>
+        )}
+
+        {cell.status === 'accepted_gap' && review?.type === 'accept_gap' && (
+          <div className="rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm text-slate-800">
+            <p className="font-semibold">You decided without this value. It scores 0.</p>
+            <p className="mt-1">Reason: {review.reason}</p>
+          </div>
+        )}
+
+        {cell.status === 'info_requested' && mode === 'view' && (
+          <div className="space-y-3">
+            <p className="rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-950">
+              Request sent to {doc.nickname}. This value scores 0 until they reply.
+            </p>
+            {isDemoGap && (
+              <div className="rounded-xl border border-dashed border-brass-400 bg-brass-50 p-3">
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-brass-800">
+                  <FlaskConical className="size-3.5" aria-hidden /> Demo only
+                </p>
+                <p className="mt-1 text-sm text-slate-700">
+                  Fill in the answer the supplier would send ({describeValue(def, scenario.demo.suggestedValue)}) and recalculate.
+                </p>
+                <Button className="mt-2" size="sm" variant="primary" icon={<MailCheck className="size-4" aria-hidden />} onClick={simulateReply}>
+                  Simulate supplier reply
+                </Button>
+              </div>
             )}
-            {review.type === 'provide' && 'You provided this value. It was not in the document.'}
-            {humanNote && <p className="mt-1 text-indigo-900">Note: {humanNote}</p>}
+            {review?.type === 'request_info' && <InfoRequestDraft message={review.message} />}
           </div>
         )}
 
@@ -357,78 +524,57 @@ function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
           <button
             type="button"
             onClick={() => dispatch({ type: 'OPEN_CELL', key: nextPending })}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-700 underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-ink-700 underline underline-offset-2 hover:text-ink-900"
           >
             Next item needing review <ArrowRight className="size-4" aria-hidden />
           </button>
         )}
 
-        {mode !== 'view' ? (
+        {mode === 'edit' || mode === 'provide' ? (
           <ValueForm
             def={def}
             mode={mode}
             initial={cell.value}
-            placeholderValue={cellKeyValue === scenario.demo.gapCell ? scenario.demo.suggestedValue : undefined}
+            placeholderValue={isDemoGap ? scenario.demo.suggestedValue : undefined}
             onCancel={() => setMode('view')}
             onSubmit={(value, note) =>
               mode === 'edit'
-                ? act(
-                    { type: 'REVIEW', key: cellKeyValue, review: { type: 'edit', value, note, at: now() }, id: newId('audit') },
-                    'Value updated. Scores recalculated.',
-                  )
-                : act(
-                    { type: 'REVIEW', key: cellKeyValue, review: { type: 'provide', value, sourceNote: note, at: now() }, id: newId('audit') },
-                    'Value added. Scores recalculated.',
-                  )
+                ? review$({ type: 'edit', value, note, at: now() }, 'Value updated. Scores recalculated.')
+                : review$({ type: 'provide', value, sourceNote: note, at: now() }, 'Value added. Scores recalculated.')
             }
           />
+        ) : mode === 'accept' ? (
+          <ReasonForm
+            onCancel={() => setMode('view')}
+            onSubmit={(reason) => review$({ type: 'accept_gap', reason, at: now() }, 'Risk accepted. The value keeps scoring 0.')}
+          />
+        ) : cell.isGap ? (
+          <GapChoices choices={gapChoices} docName={doc.nickname} onChoose={choose} />
         ) : (
           actions.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {actions.includes('confirm') && (
-                <Button
-                  variant="primary"
-                  onClick={() =>
-                    act(
-                      { type: 'REVIEW', key: cellKeyValue, review: { type: 'confirm', at: now() }, id: newId('audit') },
-                      'Value confirmed. Marked as Human-verified.',
-                    )
-                  }
-                >
+                <Button variant="primary" onClick={() => review$({ type: 'confirm', at: now() }, 'Value confirmed. Marked as Human-verified.')}>
                   Confirm
                 </Button>
               )}
               {actions.includes('edit') && <Button onClick={() => setMode('edit')}>Edit value</Button>}
-              {actions.includes('add_value') && (
-                <Button variant={cell.isGap ? 'primary' : 'secondary'} onClick={() => setMode('provide')}>
-                  {cell.status === 'human_provided' ? 'Edit value' : 'Add value'}
-                </Button>
-              )}
-              {actions.includes('request_info') && <Button onClick={draftRequest}>Draft info request</Button>}
-              {actions.includes('accept_gap') && (
-                <Button
-                  onClick={() =>
-                    act(
-                      { type: 'REVIEW', key: cellKeyValue, review: { type: 'accept_gap', at: now() }, id: newId('audit') },
-                      'Kept as gap. It still scores 0.',
-                    )
-                  }
-                >
-                  Keep as gap
-                </Button>
-              )}
+              {actions.includes('add_value') && <Button onClick={() => setMode('provide')}>Edit value</Button>}
             </div>
           )
         )}
         {cell.status === 'auto' && <p className="text-sm text-slate-500">No review needed.</p>}
-        {cell.status === 'info_requested' && review?.type === 'request_info' && mode === 'view' && (
-          <InfoRequestDraft message={review.message} />
+
+        {cell.isGap && tipping && (
+          <Section icon={<Lightbulb className="size-3.5" aria-hidden />} title="Could this change the decision?">
+            <p className="font-medium text-slate-900">{tippingSentence(tipping, doc.nickname, def)}</p>
+          </Section>
         )}
 
         {seed.extraction === 'found' ? (
           <>
             <Section icon={<Quote className="size-3.5" aria-hidden />} title="Evidence">
-              <blockquote className="rounded-lg border-l-4 border-indigo-300 bg-slate-50 px-3 py-2 leading-relaxed text-slate-800">
+              <blockquote className="rounded-lg border-l-4 border-brass-400 bg-slate-50 px-3 py-2 leading-relaxed text-slate-800">
                 <Highlighted snippet={seed.evidence.snippet} highlight={seed.evidence.highlight} />
               </blockquote>
               <p className="mt-2 flex items-center gap-1.5 text-slate-600">
@@ -464,15 +610,7 @@ function PanelBody({ cellKeyValue }: { cellKeyValue: CellKey }) {
           {cell.isGap && <p className="mt-2 text-slate-600">{GAP_RULE}</p>}
         </Section>
 
-        {cell.isGap && tipping && (
-          <Section icon={<Lightbulb className="size-3.5" aria-hidden />} title="Could this change the decision?">
-            <p className="font-medium text-slate-900">{tippingSentence(tipping, doc.nickname, def)}</p>
-          </Section>
-        )}
-
-        <p className="border-t border-slate-200 pt-4 text-xs text-slate-500">
-          Simulated AI extraction · fictional data.
-        </p>
+        <p className="border-t border-slate-200 pt-4 text-xs text-slate-500">Simulated AI extraction · fictional data.</p>
       </div>
     </div>
   );

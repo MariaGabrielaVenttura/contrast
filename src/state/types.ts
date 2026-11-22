@@ -19,7 +19,7 @@ export interface WhatIfState {
   gapPolicy: GapPolicy;
 }
 
-export type AuditActor = 'You' | 'Contrast (simulated AI)';
+export type AuditActor = 'You' | 'Contrast (simulated AI)' | 'Supplier (simulated)';
 export type AuditAction =
   | 'comparison_run'
   | 'setup_updated'
@@ -28,6 +28,7 @@ export type AuditAction =
   | 'value_added'
   | 'info_requested'
   | 'gap_accepted'
+  | 'supplier_reply'
   | 'whatif_applied';
 
 export interface AuditEntry {

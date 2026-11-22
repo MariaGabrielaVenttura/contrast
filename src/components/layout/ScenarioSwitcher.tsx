@@ -32,9 +32,9 @@ export function ScenarioSwitcher() {
               <Menu.Item
                 key={id}
                 onSelect={() => dispatch({ type: 'QUICK_START', scenarioId: id, at: now(), id: newId('audit'), withWelcome: false })}
-                className="flex cursor-pointer items-start gap-2 rounded-lg px-2.5 py-2 text-sm outline-none data-[highlighted]:bg-indigo-50"
+                className="flex cursor-pointer items-start gap-2 rounded-lg px-2.5 py-2 text-sm outline-none data-[highlighted]:bg-ink-50"
               >
-                <span className="mt-0.5 size-4 shrink-0 text-indigo-600">{current && <Check className="size-4" aria-hidden />}</span>
+                <span className="mt-0.5 size-4 shrink-0 text-ink-600">{current && <Check className="size-4" aria-hidden />}</span>
                 <span className="min-w-0">
                   <span className="block font-medium text-slate-900">
                     {s.title}

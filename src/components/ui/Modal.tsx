@@ -40,7 +40,7 @@ export function Modal({ open, onOpenChange, title, description, eyebrow, childre
             size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
           )}
         >
-          {eyebrow && <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-indigo-700">{eyebrow}</p>}
+          {eyebrow && <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brass-700">{eyebrow}</p>}
           <Dialog.Title className="pr-8 text-xl font-semibold tracking-tight text-slate-900">{title}</Dialog.Title>
           {description ? (
             <Dialog.Description className="mt-3 text-slate-600">{description}</Dialog.Description>

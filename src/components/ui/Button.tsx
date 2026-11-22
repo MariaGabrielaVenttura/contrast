@@ -17,10 +17,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 focus-visible:outline-indigo-600',
+  primary: 'bg-ink-600 text-white shadow-sm hover:bg-ink-700 focus-visible:outline-ink-600',
   secondary: 'border border-slate-300 bg-white text-slate-800 shadow-sm hover:bg-slate-50',
   ghost: 'text-slate-700 hover:bg-slate-100',
-  subtle: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
+  subtle: 'bg-ink-50 text-ink-700 hover:bg-ink-100',
   danger: 'bg-red-600 text-white shadow-sm hover:bg-red-700',
 };
 const sizes: Record<Size, string> = {

@@ -32,7 +32,7 @@ function WeightControl({ def, value, onChange }: { def: CriterionDef; value: num
         value={value}
         aria-valuetext={`${value}%`}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-2 w-full min-w-0 flex-1 cursor-pointer accent-indigo-600"
+        className="h-2 w-full min-w-0 flex-1 cursor-pointer accent-ink-600"
       />
       <div className="flex items-center gap-1">
         <label htmlFor={`${id}-n`} className="sr-only">
@@ -60,7 +60,7 @@ function LiveRankingStrip() {
   const { session, analysis, nickname } = useView();
   if (!session.hasRun || !analysis) return null;
   return (
-    <p className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900" aria-live="polite">
+    <p className="mt-4 rounded-xl border border-ink-100 bg-ink-50 px-4 py-3 text-sm text-ink-900" aria-live="polite">
       <span className="font-semibold">Current ranking with these weights: </span>
       {analysis.results.ranking.map((r, i) => `${i + 1}. ${nickname(r.docId)} ${formatPercent(r.adherence)}`).join(' · ')}
     </p>
@@ -224,7 +224,7 @@ export function CriteriaStep() {
             dispatch({ type: 'RUN_COMPARISON', at: now(), id: newId('audit') });
             window.scrollTo({ top: 0 });
           }}
-          className={cx(!valid && 'cursor-not-allowed opacity-50 hover:bg-indigo-600')}
+          className={cx(!valid && 'cursor-not-allowed opacity-50 hover:bg-ink-600')}
         >
           Run comparison
         </Button>

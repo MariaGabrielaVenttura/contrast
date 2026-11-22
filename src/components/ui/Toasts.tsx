@@ -20,7 +20,7 @@ function ToastItem({ toast }: { toast: Toast }) {
   const Icon = toast.tone === 'error' ? XCircle : toast.tone === 'info' ? Info : CheckCircle2;
   return (
     <div className="pointer-events-auto flex w-full items-start gap-3 rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg">
-      <Icon className={toast.tone === 'error' ? 'mt-0.5 size-4 shrink-0 text-red-300' : 'mt-0.5 size-4 shrink-0 text-indigo-300'} aria-hidden />
+      <Icon className={toast.tone === 'error' ? 'mt-0.5 size-4 shrink-0 text-red-300' : 'mt-0.5 size-4 shrink-0 text-ink-300'} aria-hidden />
       <p className="flex-1">{toast.message}</p>
       <button
         type="button"

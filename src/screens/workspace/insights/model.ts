@@ -3,8 +3,9 @@
 import { getCriterion } from '../../../data/scenarios';
 import type { CellKey, DocId, Scenario } from '../../../data/types';
 import { splitCellKey } from '../../../data/types';
-import type { CellStatus } from '../../../lib/cells';
+import type { CellStatus, ResolvedCell } from '../../../lib/cells';
 import { STATUS_LABEL } from '../../../lib/cells';
+import { decisionLabel, decisionStatus, isProvisional, recommendationPrefix, type DecisionStatus } from '../../../lib/decision';
 import { formatPercent, formatPoints, formatScore, possessive } from '../../../lib/format';
 import { robustnessReason, tippingSentence } from '../../../lib/messages';
 import { canChangeLeader, type Analysis, type Robustness } from '../../../lib/scoring';
@@ -18,6 +19,8 @@ export interface GapItem {
   statusLabel: string;
   sentence: string;
   canChange: boolean;
+  /** Reason given when the user decided without this value. */
+  reason?: string;
 }
 
 export interface InsightsModel {
@@ -28,6 +31,9 @@ export interface InsightsModel {
   tiedNames: string[];
   tieText: string;
   recommendationText: string;
+  decision: DecisionStatus;
+  decisionText: string;
+  provisional: boolean;
   robustness: Robustness;
   robustnessText: string;
   gapToSecondText: string | null;
@@ -45,8 +51,9 @@ export function insightsModel(
   scenario: Scenario,
   analysis: Analysis,
   nickname: (id: DocId) => string,
-  statusOf: (key: CellKey) => CellStatus,
+  cells: Record<CellKey, ResolvedCell>,
 ): InsightsModel {
+  const statusOf = (key: CellKey): CellStatus => cells[key].status;
   const { results, drivers, robustness, tipping } = analysis;
   const leaderId = results.leaderId;
   const leaderName = nickname(leaderId);
@@ -81,6 +88,7 @@ export function insightsModel(
     }
   }
 
+  const decision = decisionStatus(analysis, statusOf);
   const rankOf = (id: DocId) => results.byDoc[id]?.rank ?? 99;
   const order = analysis.input.criteria.map((c) => c.def.id);
   const gaps: GapItem[] = analysis.gaps
@@ -98,6 +106,7 @@ export function insightsModel(
         statusLabel: STATUS_LABEL[status],
         sentence: tippingSentence(t, nickname(docId), def),
         canChange: canChangeLeader(t),
+        reason: cells[key].review?.type === 'accept_gap' ? (cells[key].review as { reason: string }).reason : undefined,
       };
     })
     .sort((a, b) => rankOf(a.docId) - rankOf(b.docId) || order.indexOf(splitCellKey(a.key).criterionId) - order.indexOf(splitCellKey(b.key).criterionId));
@@ -109,7 +118,10 @@ export function insightsModel(
     isTie: results.isTie,
     tiedNames: results.tiedDocIds.map(nickname),
     tieText,
-    recommendationText: `Recommended: ${leaderName} — ${formatPercent(results.byDoc[leaderId].adherence)}`,
+    recommendationText: `${recommendationPrefix(decision)}: ${leaderName} — ${formatPercent(results.byDoc[leaderId].adherence)}`,
+    decision,
+    decisionText: decisionLabel(decision),
+    provisional: isProvisional(decision),
     robustness,
     robustnessText,
     gapToSecondText,

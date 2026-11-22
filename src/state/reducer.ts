@@ -196,6 +196,15 @@ function reviewAudit(scenario: Scenario, s: ScenarioSession, key: CellKey, revie
         note: review.note || undefined,
       };
     case 'provide':
+      if (review.via === 'supplier_reply') {
+        return {
+          ...base,
+          actor: 'Supplier (simulated)',
+          action: 'supplier_reply',
+          summary: `Supplier reply received for ${label}: ${describeValue(def, review.value)}.`,
+          note: review.sourceNote,
+        };
+      }
       return {
         ...base,
         action: 'value_added',
@@ -207,7 +216,12 @@ function reviewAudit(scenario: Scenario, s: ScenarioSession, key: CellKey, revie
     case 'request_info':
       return { ...base, action: 'info_requested', summary: `Drafted an information request for ${label}.` };
     case 'accept_gap':
-      return { ...base, action: 'gap_accepted', summary: `Kept ${label} as an accepted gap (scores 0).` };
+      return {
+        ...base,
+        action: 'gap_accepted',
+        summary: `Decided without ${label}: risk accepted (scores 0).`,
+        note: review.reason,
+      };
   }
 }
 

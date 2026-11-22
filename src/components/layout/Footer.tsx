@@ -8,7 +8,7 @@ export function Footer() {
             href="https://www.linkedin.com/in/mariagabrielaventura"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-indigo-700 underline-offset-2 hover:underline"
+            className="font-medium text-ink-700 underline-offset-2 hover:underline"
           >
             Maria Gabriela Ventura
             <span className="sr-only"> (opens in a new tab)</span>

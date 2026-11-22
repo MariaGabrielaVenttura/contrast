@@ -45,7 +45,7 @@ export function SetupStep() {
             return (
               <li key={d.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <FileText className="mt-0.5 size-5 shrink-0 text-indigo-600" aria-hidden />
+                  <FileText className="mt-0.5 size-5 shrink-0 text-ink-600" aria-hidden />
                   <div className="min-w-0">
                     <p className="break-words font-medium text-slate-900">{d.name}</p>
                     <p className="text-sm text-slate-500">
