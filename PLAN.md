@@ -15,7 +15,7 @@ Contrast is a personal product prototype, built to practise the full product cyc
 4. **The report date is the current date at render time** (`new Date()`, formatted as `21 November 2026`). It is never a fixed date.
 5. **All open-question recommendations are accepted** (§12). For 13a, every source reference is fictional and consistent with the document page counts.
 6. **Cut order if time gets tight:**
-   1. live ranking strip (OQ-2)
+   1. ~~live ranking strip (OQ-2)~~: removed, see §14
    2. second Playwright test (OQ-16)
    3. What-if "Apply" (Reset stays)
    4. audit-trail diff text
@@ -76,7 +76,7 @@ contrast/
     screens/
       start/                    # StartScreen, ScenarioCard, UploadDropzone, AboutModal
       setup/                    # SetupLayout (stepper), SetupStep, CriteriaStep, CriterionRow,
-                                #   WeightTotal, SuggestionsList, LiveRankingStrip
+                                #   WeightTotal, SuggestionsList
       workspace/
         Workspace.tsx           # header + tabs + active tab
         compare/                # CompareTab, CompareToolbar, Legend, MatrixTable, MatrixCell, TotalsRow,
@@ -470,7 +470,7 @@ Raw tipping boundaries, as a sanity check: Gamma 39.625 → 40, FastFreight 62.7
 - **"Distribute evenly"** button (largest remainder).
 - **"More suggestions"** section: each suggestion has name, rule chip and "Add". Adding inserts it at the end with weight 0 and moves focus to its weight input. Removed default criteria also go back to this list. Empty state: "No more suggestions for this scenario."
 - **"Add custom criterion"** is aria-disabled, with tooltip "Custom criteria are available in the full version".
-- **Live ranking strip** (only after the first run and only while the total is 100%): "Current ranking with these weights: 1. Norden API 89.8% · 2. Helix Chem 83.2% · 3. Pacífico Labs 81.6%" (see OQ-2).
+- ~~**Live ranking strip**~~: removed (OQ-2 reversed, see §14). The Criteria step shows no results.
 - Footer buttons: "Back to setup" · **"Run comparison"** (aria-disabled unless total = 100 and count ≥ 3; clicking while disabled focuses the helper text).
 
 ### 5.5 Workspace header (sticky)
@@ -747,7 +747,7 @@ Every phase ends with `npm run test` and `npm run build` green, then a git commi
 3. **Scoring engine:** `scoring.ts`, `cells.ts`, `format.ts`, `messages.ts`, with all of §9's unit tests passing. Commit `feat(scoring): scoring, tipping points, robustness + tests`.
    **STOP 1:** show the Vitest output for every value in the §4.5 table, then wait before building any UI.
 4. **State:** `state/*`, reducer tests, `useScenarioView`, checklist derivation. Commit.
-5. **Start + Setup + Criteria screens:** dropzone toast, About modal, scenario cards, nickname validation, weights/total/distribute/remove/reorder/suggestions, disabled custom criterion, live ranking strip (first to cut), Run. Commit.
+5. **Start + Setup + Criteria screens:** dropzone toast, About modal, scenario cards, nickname validation, weights/total/distribute/remove/reorder/suggestions, disabled custom criterion, Run. Commit. (The live ranking strip shipped here was removed later; see §14.)
 6. **Workspace + Compare:** header (Demo pill, switcher, Edit setup, Start over dialog), tabs + badge, matrix, cells, totals, filters, counter, legend, evidence panel, all review forms, info request + copy, audit logging, ranking toasts/live region, pharma banner. Commit.
 7. **Insights, core only:** recommendation/tie, robustness, drivers, gaps list (the What-if panel area is left out for now). Commit.
 8. **Report:** document (date = current date at render), lock overlay, Export PDF + print stylesheet, Copy summary. The "simulation (not applied)" box is wired in later with What-if. Commit.
@@ -802,6 +802,7 @@ Every phase ends with `npm run test` and `npm run build` green, then a git commi
    - a) Nothing extra; results recompute when you get to Compare.
    - **b) A one-line live ranking strip on the Criteria step, after the first run, while the total is 100%.**
    - c) A full live matrix preview.
+   - **Reversed (§14): a).** The strip let users tune weights until their preferred option won. Exploring weights with results happens only in What-if.
 3. **Demo accelerators** (not in the spec, but they serve priority #1):
    - a) None.
    - **b) "Show me" links on checklist steps + "Next item needing review" in the panel.**
@@ -914,3 +915,19 @@ This plan is saved as `PLAN.md` in the project root. Implementation follows the 
 **Fixes**
 - Print: `@page { margin: 0 }` with inner padding, so the browser's header and footer don't print. Fit the content to A4 portrait width, and verify by rendering a PDF.
 - Focus ring for keyboard only: input-modality tracking (`html[data-input="keyboard"]`), no outline on programmatic focus targets (`tabindex="-1"`).
+
+
+---
+
+## 14. Change: bias safeguards for weights
+
+**Why:** showing the ranking next to the weights lets users tune weights until their preferred option wins.
+
+- **OQ-2 reversed.** The "Current ranking with these weights" strip is removed from the Criteria step. Weights are explored against results only in What-if, which is clearly labelled as a simulation.
+- **Governance flag** (`session.changedAfterResults`, reducer-owned):
+  - Set when a later Run comparison changes the set of criteria or any weight compared with the previous run. Reordering criteria or renaming documents doesn't count.
+  - Also set when What-if "Apply as new setup" changes weights or criteria. An Apply that only changes the gap policy doesn't.
+  - Sticky: changing the weights back doesn't clear it. Only Start over does.
+  - When set, Insights and the Report's criteria section show: "Weights were changed after results were seen. See the audit trail."
+  - Unit tests cover each case above.
+- **"Why suggested"** appends "· the missing one is flagged as a gap" or "· the missing ones are flagged as gaps" when a criterion is found in fewer than all documents.

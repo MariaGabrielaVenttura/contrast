@@ -11,7 +11,19 @@ describe('why suggested', () => {
     expect(foundCount(D, 'd_purity')).toEqual({ found: 3, total: 3 });
     expect(foundCount(D, 'd_inspection')).toEqual({ found: 2, total: 3 });
     expect(foundCount(SCENARIOS.B, 'b_churn')).toEqual({ found: 1, total: 2 });
-    expect(whySuggested(D, 'd_inspection')).toBe('Found in 2 of 3 documents');
+    expect(whySuggested(D, 'd_purity')).toBe('Found in 3 of 3 documents');
+    expect(whySuggested(D, 'd_inspection')).toBe('Found in 2 of 3 documents · the missing one is flagged as a gap');
+  });
+  it('pluralizes when more than one document is missing the value', () => {
+    const synthetic = {
+      ...D,
+      cells: {
+        ...D.cells,
+        'd_purity|helix': { extraction: 'not_found' as const, searchNote: 'x' },
+        'd_purity|norden': { extraction: 'not_found' as const, searchNote: 'x' },
+      },
+    };
+    expect(whySuggested(synthetic, 'd_purity')).toBe('Found in 1 of 3 documents · the missing ones are flagged as gaps');
   });
   it('every criterion, suggestions included, has a reason', () => {
     for (const s of Object.values(SCENARIOS)) for (const c of s.criteria) expect(c.suggestionReason.length, c.id).toBeGreaterThan(10);

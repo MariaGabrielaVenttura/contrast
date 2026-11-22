@@ -63,6 +63,8 @@ export interface ScenarioSession {
   filters: Filters;
   openCell: CellKey | null;
   exported: boolean;
+  /** Governance flag: weights or criteria changed after results were first seen. Never resets (except Start over). */
+  changedAfterResults: boolean;
 }
 
 export interface Toast {

@@ -5,7 +5,6 @@ import { cx } from '../../components/ui/cx';
 import { getCriterion, suggestionCriteria } from '../../data/scenarios';
 import type { CriterionDef, Scenario } from '../../data/types';
 import { acceptance, acceptanceText, whySuggested } from '../../lib/suggestions';
-import { formatPercent } from '../../lib/format';
 import { ruleLabel } from '../../lib/rules';
 import { newId, now, useApp, useView } from '../../state/AppContext';
 import { MIN_CRITERIA, weightTotal } from '../../state/reducer';
@@ -65,17 +64,6 @@ function WeightControl({ def, value, onChange }: { def: CriterionDef; value: num
         </span>
       </div>
     </div>
-  );
-}
-
-function LiveRankingStrip() {
-  const { session, analysis, nickname } = useView();
-  if (!session.hasRun || !analysis) return null;
-  return (
-    <p className="mt-4 rounded-xl border border-ink-100 bg-ink-50 px-4 py-3 text-sm text-ink-900" aria-live="polite">
-      <span className="font-semibold">Current ranking with these weights: </span>
-      {analysis.results.ranking.map((r, i) => `${i + 1}. ${nickname(r.docId)} ${formatPercent(r.adherence)}`).join(' · ')}
-    </p>
   );
 }
 
@@ -191,8 +179,6 @@ export function CriteriaStep() {
           </Button>
         </div>
       </div>
-
-      <LiveRankingStrip />
 
       <section className="mt-10" aria-labelledby="suggestions-heading">
         <h2 id="suggestions-heading" className="font-semibold text-slate-900">

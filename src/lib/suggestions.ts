@@ -12,7 +12,10 @@ export function foundCount(scenario: Scenario, criterionId: CriterionId): { foun
 
 export function whySuggested(scenario: Scenario, criterionId: CriterionId): string {
   const { found, total } = foundCount(scenario, criterionId);
-  return `Found in ${found} of ${total} documents`;
+  const missing = total - found;
+  const gapNote =
+    missing === 0 ? '' : missing === 1 ? ' · the missing one is flagged as a gap' : ' · the missing ones are flagged as gaps';
+  return `Found in ${found} of ${total} documents${gapNote}`;
 }
 
 export interface SetupLike {

@@ -1,4 +1,5 @@
-import { Shield, ShieldAlert, ShieldCheck, Scale } from 'lucide-react';
+import { History, Shield, ShieldAlert, ShieldCheck, Scale } from 'lucide-react';
+import { CHANGED_AFTER_RESULTS_NOTE } from '../../../state/reducer';
 import { cx } from '../../../components/ui/cx';
 import type { RobustnessLevel } from '../../../lib/scoring';
 
@@ -24,5 +25,19 @@ export function TieBanner({ text }: { text: string }) {
       <Scale className="mt-0.5 size-5 shrink-0" aria-hidden />
       <p className="font-medium">{text}</p>
     </div>
+  );
+}
+
+/** Governance note: shown when weights or criteria changed after results were seen. */
+export function ChangedAfterResultsNote({ className }: { className?: string }) {
+  return (
+    <p
+      role="note"
+      data-testid="changed-after-results"
+      className={cx('flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950', className)}
+    >
+      <History className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+      {CHANGED_AFTER_RESULTS_NOTE}
+    </p>
   );
 }

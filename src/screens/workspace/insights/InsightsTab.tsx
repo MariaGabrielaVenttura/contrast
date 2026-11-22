@@ -6,7 +6,7 @@ import { acceptance, acceptanceText } from '../../../lib/suggestions';
 import { useApp, useView } from '../../../state/AppContext';
 import { insightsModel } from './model';
 import { DecisionStamp } from './DecisionStamp';
-import { RobustnessBadge, TieBanner } from './shared';
+import { ChangedAfterResultsNote, RobustnessBadge, TieBanner } from './shared';
 import { WhatIfSlot } from './WhatIfSlot';
 
 export function InsightsTab() {
@@ -64,6 +64,7 @@ export function InsightsTab() {
           <p className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-600" data-testid="acceptance">
             {acceptanceText(acceptance(scenario, view.session.setup))}
           </p>
+          {view.session.changedAfterResults && <ChangedAfterResultsNote className="mt-2" />}
         </section>
 
         <section aria-labelledby="drivers-heading" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

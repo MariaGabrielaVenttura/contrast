@@ -13,7 +13,7 @@ import type { AuditEntry } from '../../../state/types';
 import { DecisionStamp } from '../insights/DecisionStamp';
 import { buildRows } from '../compare/model';
 import type { InsightsModel } from '../insights/model';
-import { RobustnessBadge, TieBanner } from '../insights/shared';
+import { ChangedAfterResultsNote, RobustnessBadge, TieBanner } from '../insights/shared';
 
 export const PRINT_AUDIT_LIMIT = 8;
 
@@ -191,6 +191,7 @@ export function ReportDocument({ view, model }: { view: ScenarioView; model: Ins
           <p className="mb-1.5 text-xs text-slate-600" data-testid="report-acceptance">
             {acceptanceText(acceptance(scenario, session.setup))}
           </p>
+          {session.changedAfterResults && <ChangedAfterResultsNote className="mb-2" />}
           <ul className="space-y-1 text-sm">
             {criteria.map(({ def, weight }) => (
               <li key={def.id} className="flex items-baseline justify-between gap-3">

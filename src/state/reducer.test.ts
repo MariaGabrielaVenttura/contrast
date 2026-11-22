@@ -264,3 +264,69 @@ describe('What-if reproduces the SPEC neutral gap policy results', () => {
 });
 
 const defaultWeightsD = { d_purity: 25, d_impurity: 20, d_gmp: 15, d_price: 15, d_leadtime: 10, d_inspection: 15 };
+
+describe('governance flag: weights changed after results were seen', () => {
+  it('is off after the first run (Quick demo and Run comparison)', () => {
+    expect(apply(initialState, quick('D')).sessions.D!.changedAfterResults).toBe(false);
+    const s = apply(initialState, { type: 'OPEN_SCENARIO', scenarioId: 'A' }, { type: 'SET_WEIGHT', criterionId: 'a_cost', weight: 20 }, { type: 'SET_WEIGHT', criterionId: 'a_golive', weight: 25 }, { type: 'RUN_COMPARISON', at, id: id() });
+    expect(s.sessions.A!.changedAfterResults).toBe(false);
+  });
+  it('turns on when Edit setup changes a weight and the comparison is run again', () => {
+    const s = apply(
+      initialState,
+      quick('D'),
+      { type: 'SET_STAGE', stage: 'criteria' },
+      { type: 'SET_WEIGHT', criterionId: 'd_purity', weight: 20 },
+      { type: 'SET_WEIGHT', criterionId: 'd_leadtime', weight: 15 },
+      { type: 'RUN_COMPARISON', at, id: id() },
+    );
+    expect(s.sessions.D!.changedAfterResults).toBe(true);
+  });
+  it('turns on when a criterion is removed or added after results', () => {
+    const s = apply(
+      initialState,
+      quick('A'),
+      { type: 'SET_STAGE', stage: 'criteria' },
+      { type: 'ADD_CRITERION', criterionId: 'a_refs' },
+      { type: 'RUN_COMPARISON', at, id: id() },
+    );
+    expect(s.sessions.A!.changedAfterResults).toBe(true);
+  });
+  it('stays off for re-runs without weight or criteria changes (reorder, rename)', () => {
+    const s = apply(
+      initialState,
+      quick('D'),
+      { type: 'SET_STAGE', stage: 'criteria' },
+      { type: 'MOVE_CRITERION', criterionId: 'd_purity', direction: 1 },
+      { type: 'SET_NICKNAME', docId: 'helix', value: 'Helix' },
+      { type: 'RUN_COMPARISON', at, id: id() },
+    );
+    expect(s.sessions.D!.changedAfterResults).toBe(false);
+  });
+  it('turns on with What-if Apply that changes weights, not with a gap-policy-only Apply', () => {
+    const policyOnly = apply(initialState, quick('A'), { type: 'SET_WHATIF', patch: { gapPolicy: 'neutral' } }, { type: 'APPLY_WHATIF', at, id: id() });
+    expect(policyOnly.sessions.A!.changedAfterResults).toBe(false);
+    const weights = apply(initialState, quick('D'), {
+      type: 'SET_WHATIF',
+      patch: { weights: { ...defaultWeightsD, d_inspection: 30 } },
+    }, { type: 'APPLY_WHATIF', at, id: id() });
+    expect(weights.sessions.D!.changedAfterResults).toBe(true);
+  });
+  it('is sticky: changing the weights back does not clear it; Start over does', () => {
+    let s = apply(
+      initialState,
+      quick('D'),
+      { type: 'SET_STAGE', stage: 'criteria' },
+      { type: 'SET_WEIGHT', criterionId: 'd_purity', weight: 20 },
+      { type: 'SET_WEIGHT', criterionId: 'd_leadtime', weight: 15 },
+      { type: 'RUN_COMPARISON', at, id: id() },
+      { type: 'SET_STAGE', stage: 'criteria' },
+      { type: 'SET_WEIGHT', criterionId: 'd_purity', weight: 25 },
+      { type: 'SET_WEIGHT', criterionId: 'd_leadtime', weight: 10 },
+      { type: 'RUN_COMPARISON', at, id: id() },
+    );
+    expect(s.sessions.D!.changedAfterResults).toBe(true);
+    s = apply(s, { type: 'RESET_ALL' }, quick('D'));
+    expect(s.sessions.D!.changedAfterResults).toBe(false);
+  });
+});

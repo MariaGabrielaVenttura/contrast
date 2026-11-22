@@ -82,7 +82,16 @@ export function createSession(scenario: Scenario): ScenarioSession {
     filters: { onlyDifferences: false, needsReviewOnly: false },
     openCell: null,
     exported: false,
+    changedAfterResults: false,
   };
+}
+
+export const CHANGED_AFTER_RESULTS_NOTE = 'Weights were changed after results were seen. See the audit trail.';
+
+/** True when the set of criteria or any weight differs (order and nicknames don't count). */
+export function weightsOrCriteriaChanged(a: Setup, b: Setup): boolean {
+  if (a.criteria.length !== b.criteria.length || a.criteria.some((id) => !b.criteria.includes(id))) return true;
+  return a.criteria.some((id) => (a.weights[id] ?? 0) !== (b.weights[id] ?? 0));
 }
 
 export function weightTotal(setup: Setup): number {
@@ -172,8 +181,10 @@ function runSession(scenario: Scenario, s: ScenarioSession, at: string, id: stri
     action: 'criteria_confirmed',
     summary: `Criteria confirmed. ${acceptanceText(acceptance(scenario, s.setup))}.`,
   };
+  const changedNow = s.hasRun && !!s.lastRunSetup && weightsOrCriteriaChanged(s.lastRunSetup, s.setup);
   return {
     ...s,
+    changedAfterResults: s.changedAfterResults || changedNow,
     hasRun: true,
     stage: 'workspace',
     activeTab: 'compare',
@@ -401,6 +412,7 @@ export function reducer(state: AppState, action: Action): AppState {
         };
         return {
           ...s,
+          changedAfterResults: s.changedAfterResults || weightsOrCriteriaChanged(s.setup, next),
           setup: next,
           whatIf: null,
           lastRunSetup: { criteria: [...next.criteria], weights: { ...next.weights } },
