@@ -6,7 +6,7 @@
 - Problem: important business decisions depend on documents that are hard to compare. Each comes in a different format, information is scattered or missing, the work is done by hand in spreadsheets, and the reasoning behind the final choice is rarely recorded.
 - Users: anyone choosing between options based on documents, in any industry (procurement, finance, legal, pharma quality, IT, operations).
 - Origin: generalizes a procurement agent the author built to compare supplier proposals. No code, data or branding from that work is used.
-- Why this prototype exists: it is a portfolio piece for a Product Owner application at a healthtech SaaS. Reviewers (recruiters and hiring managers) will spend 2–3 minutes on it and evaluate user flows, screens, wording, business rules and the ability to prototype with AI tools.
+- Why this prototype exists: it is a personal project to practise the full product cycle, from spec to working prototype. Visitors will typically spend 2–3 minutes on it, so user flows, screens, wording, business rules and the prototyping approach must be easy to evaluate.
 - What matters most, in order: (1) the guided demo makes the value obvious in 2 minutes; (2) every number is correct and consistent with this spec; (3) the UI is clear, polished and trustworthy; (4) business rules are visible and explainable; (5) honesty about what is simulated.
 - Non-goals: real AI or file parsing, authentication, persistence across sessions, backend.
 

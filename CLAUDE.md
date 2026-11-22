@@ -1,6 +1,6 @@
 # Contrast — project rules
 
-- Context: Contrast is a portfolio prototype for a Product Owner application. Read the "Product context" section of SPEC.md before anything else; when in doubt, favor clarity of the 2-minute demo, correct numbers and honest labeling of what is simulated.
+- Context: Contrast is a personal product prototype. Read the "Product context" section of SPEC.md before anything else; when in doubt, favor clarity of the 2-minute demo, correct numbers and honest labeling of what is simulated.
 - Stack: Vite + React + TypeScript + Tailwind CSS. No backend. No real AI calls.
 - All demo data lives in src/data/scenarios.ts as typed constants. Never invent values beyond SPEC.md.
 - Scoring logic lives in src/lib/scoring.ts as pure functions, covered by Vitest tests in src/lib/scoring.test.ts.
